@@ -1,9 +1,9 @@
-site_name: Notes for Computer Network
-repo_url: https://github.com/chuan-325/net-21sp
-repo_name: chuan-325/net-21sp
+site_name: Notes for Compiler Principles
+repo_url: https://github.com/chuan-325/comp-21sp
+repo_name: chuan-325/comp-21sp
 nav:
   - Home: index.md
-  - Chapter 1 计算机网络概述: chap_01.md
+  - Chapter 1 编译概论: chap_01.md
 theme:
   name: material
   palette:
@@ -11,7 +11,6 @@ theme:
     accent: teal
   language: zh
   features:
-    # - toc.integrate
     - search.suggest
     - search.highlight
 markdown_extensions:
