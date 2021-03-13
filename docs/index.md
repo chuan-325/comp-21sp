@@ -9,7 +9,7 @@ This is a course note collection for **Compiler Principles (21sp)** at Universit
 ## Table of Contents
 
 - [Chapter 01: 编译概论](chap_01.md)
-- Chapter 02:
+- [Chapter 02: 一个简单的语法制导翻译器](chap_02.md)
 - Chapter 03:
 - Chapter 04:
 - Chapter 05:
