@@ -8,6 +8,8 @@ This is a course note collection for **Compiler Principles (21sp)** at Universit
 
 ## Table of Contents
 
+### Notes
+
 - [Chapter 01: 编译概论](chap_01.md)
 - [Chapter 02: 一个简单的语法制导翻译器](chap_02.md)
 - Chapter 03:
@@ -16,6 +18,10 @@ This is a course note collection for **Compiler Principles (21sp)** at Universit
 - Chapter 06:
 - Chapter 07:
 - Chapter 08:
+
+### Homework
+
+- [hw01](hw/hw_01.md)
 
 ## Further Information
 
