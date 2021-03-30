@@ -21,7 +21,11 @@ This is a course note collection for **Compiler Principles (21sp)** at Universit
 
 ### Homework
 
-- [hw01](hw/hw_01.md)
+- [hw-01](hw/hw_01.md)
+- [hw-02](hw/hw_02_01.md)
+- [hw-02](hw/hw_02_02.md)
+- [hw-03](hw/hw_03_01.md)
+- [hw-03](hw/hw_03_02.md)
 
 ## Further Information
 

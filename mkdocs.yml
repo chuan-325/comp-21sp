@@ -4,10 +4,14 @@ repo_name: chuan-325/comp-21sp
 nav:
   - Home: index.md
   - Note:
-    - C1 编译概论: chap_01.md
-    - C2 一个简单的语法制导翻译器: chap_02.md
+      - C1 编译概论: chap_01.md
+      - C2 一个简单的语法制导翻译器: chap_02.md
   - Homework:
-    - hw01: hw/hw_01.md
+      - hw-01: hw/hw_01.md
+      - hw-02-01: hw/hw_02_01.md
+      - hw-02-02: hw/hw_02_02.md
+      - hw-03-01: hw/hw_03_01.md
+      - hw-03-02: hw/hw_03_02.md
 theme:
   name: material
   palette:

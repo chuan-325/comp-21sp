@@ -23,7 +23,7 @@
 >
 > **优化**既有分析, 也有综合.
 
-![compiler-workflow](chap_01.assets/compiler-workflow.png){: style="height:400px"}
+![compiler-workflow.](chap_01.assets/compiler-workflow.png){: style="height:400px"}
 
 **语法树**: 语法分析生成语法树, 语义分析生成的语法树是已经经过修饰的语法树.
 
@@ -35,7 +35,7 @@
 
 **Preview by Example**: 编译赋值语句
 
-![translation-of-an-assignment-statement](chap_01.assets/translation-of-an-assignment-statement.png){: style="height:540px" }
+![translation-of-an-assignment-statement.](chap_01.assets/translation-of-an-assignment-statement.png){: style="height:540px" }
 
 ### 1.2.1 词法分析
 
@@ -64,7 +64,7 @@
 
 > **例** (语法分析)
 >
-> ![parser-example](chap_01.assets/parser-example.png){: style="height:200px" }
+> ![parser-example.](chap_01.assets/parser-example.png){: style="height:200px" }
 
 ### 1.2.3 语义分析
 
@@ -83,7 +83,7 @@
 
 > **例** (语义分析)
 >
-> ![semantic-analyzer-example](chap_01.assets/semantic-analyzer-example.png){ : style="height:200px"}
+> ![semantic-analyzer-example.](chap_01.assets/semantic-analyzer-example.png){ : style="height:200px"}
 
 ### 1.2.4 中间代码生成
 
@@ -271,7 +271,7 @@ STF id1, R1
 
 - 如 C 语言中将左值映射为它们的相应右值.
 
-![name-environment-state-value](chap_01.assets/name-environment-state-value.png){: style="height:150px"}
+![name-environment-state-value.](chap_01.assets/name-environment-state-value.png){: style="height:150px"}
 
 ### 1.6.3 静态作用域和块结构
 
