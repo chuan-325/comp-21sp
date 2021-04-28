@@ -153,15 +153,15 @@ $$
 
 设 $L, L_1, L_2$ 分别是定义在字母表 $\Sigma, \Sigma_1, \Sigma_2$.
 
-| Operation | Definition                                                    |
-| --------- | ------------------------------------------------------------- |
-| 并        | $L_1\cup L_2=\{x \| x\in L_1, \text{or }x\in L_2\}$           |
-| 交        | $L_1\cap L_2=\{x \| x\in L_1, \text{and }x\in L_2\}$          |
-| 补        | $\overline{L}=\{x \| x\in \Sigma^{*}, \text{and }x\notin L\}$ |
-| 积        | $L_1L_2=\{xy \| x\in L_1, \text{and }y\in L_2\}$              |
-| 幂        | $L^0=\{\epsilon\}$, $L^n=L^{n-1}L=LL^{n-1}, n\geq 1$          |
-| 闭包      | $L^{*}=\bigcup_{i=0}^{\infty} L^i$                            |
-| 正闭包    | $L^{+}=\bigcup_{i=1}^{\infty} L^i$                            |
+| Operation | Definition                                                        |
+| --------- | ----------------------------------------------------------------- |
+| 并        | $L_1\cup L_2=\{x \lvert x\in L_1, \text{or }x\in L_2\}$           |
+| 交        | $L_1\cap L_2=\{x \lvert x\in L_1, \text{and }x\in L_2\}$          |
+| 补        | $\overline{L}=\{x \lvert x\in \Sigma^{*}, \text{and }x\notin L\}$ |
+| 积        | $L_1L_2=\{xy \lvert x\in L_1, \text{and }y\in L_2\}$              |
+| 幂        | $L^0=\{\epsilon\}$, $L^n=L^{n-1}L=LL^{n-1}, n\geq 1$              |
+| 闭包      | $L^{*}=\bigcup_{i=0}^{\infty} L^i$                                |
+| 正闭包    | $L^{+}=\bigcup_{i=1}^{\infty} L^i$                                |
 
 > 由最后两行, 显然可知:
 >
@@ -313,7 +313,7 @@ $$
 与这个产生式 **关联** 的 **语义规则**
 
 $$
-expr.t = expr_1.t\ \|\ term.t\ \|\ \text{'+'}
+expr.t = expr_1.t\ |\ term.t\ |\ \text{'+'}
 $$
 
 定义了计算属性 $expr.t$ 的值的方式: 将左/右运算分量 ($expr_1$ 和 $term$) 的后缀表示形式 ($expr_1.t$ 和 $term.t$) 连接起来, 再在后面加上加号.
