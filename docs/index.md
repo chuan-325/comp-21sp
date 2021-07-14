@@ -4,28 +4,7 @@
 
 This is a course note collection for **Compiler Principles (21sp)** at University of Chinese Academy of Sciences(UCAS), taught by [Xiaobing Feng](http://people.ucas.ac.cn/~fengxiaobing).
 
-**Status**: Incompleted (0/9)
-
-## Table of Contents
-
-### Notes
-
-- [Chapter 01: 编译概论](chap_01.md)
-- [Chapter 02: 一个简单的语法制导翻译器](chap_02.md)
-- Chapter 03:
-- Chapter 04:
-- Chapter 05:
-- Chapter 06:
-- Chapter 07:
-- Chapter 08:
-
-### Homework
-
-- [hw-01](hw/hw_01.md)
-- [hw-02](hw/hw_02_01.md)
-- [hw-02](hw/hw_02_02.md)
-- [hw-03](hw/hw_03_01.md)
-- [hw-03](hw/hw_03_02.md)
+**Status**: Incompleted (2/9)
 
 ## Further Information
 

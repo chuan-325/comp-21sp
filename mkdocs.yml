@@ -6,6 +6,12 @@ nav:
   - Note:
       - C1 编译概论: chap_01.md
       - C2 一个简单的语法制导翻译器: chap_02.md
+      - C3 词法分析: chap_03.md
+      - C4 语法分析: chap_04.md
+      - C5 语法制导的翻译: chap_05.md
+      # - C6 ?: chap_06.md
+      # - C7 ?: chap_07.md
+      - C8 代码生成和优化: chap_08.md
   - Homework:
       - hw-01-01: hw/hw_01.md
       - hw-02-01: hw/hw_02_01.md
