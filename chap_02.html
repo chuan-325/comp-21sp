@@ -1,0 +1,2238 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.1, mkdocs-material-7.1.10">
+    
+    
+      
+        <title>C2 一个简单的语法制导翻译器 - Notes for Compiler Principles</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.1fe995fd.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.f1a3b89f.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#009485">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <script>function __prefix(e){return new URL(".",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#c2" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="Notes for Compiler Principles" class="md-header__button md-logo" aria-label="Notes for Compiler Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Notes for Compiler Principles
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              C2 一个简单的语法制导翻译器
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/chuan-325/comp-21sp/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chuan-325/comp-21sp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="Notes for Compiler Principles" class="md-nav__button md-logo" aria-label="Notes for Compiler Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    Notes for Compiler Principles
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/chuan-325/comp-21sp/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chuan-325/comp-21sp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      <label class="md-nav__link" for="__nav_2">
+        Note
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Note" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Note
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_01.html" class="md-nav__link">
+        C1 编译概论
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          C2 一个简单的语法制导翻译器
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="chap_02.html" class="md-nav__link md-nav__link--active">
+        C2 一个简单的语法制导翻译器
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    2.1 引言
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    2.2 语法定义
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2 语法定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#221" class="md-nav__link">
+    2.2.1 文法定义
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#222" class="md-nav__link">
+    2.2.2 推导 (归约)*
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#223" class="md-nav__link">
+    2.2.3 语法分析树
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#224" class="md-nav__link">
+    2.2.4 二义性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#225" class="md-nav__link">
+    2.2.5 算符的结合性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#226" class="md-nav__link">
+    2.2.6 算符的优先性
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    2.3 语法制导翻译
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3 语法制导翻译">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#231" class="md-nav__link">
+    2.3.1 后缀表示
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#232" class="md-nav__link">
+    2.3.2 综合属性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#233" class="md-nav__link">
+    2.3.3 简单语法制导定义
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#234" class="md-nav__link">
+    2.3.4 树的遍历
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#235" class="md-nav__link">
+    2.3.5 翻译方案
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#24" class="md-nav__link">
+    2.4 语法分析
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4 语法分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#241" class="md-nav__link">
+    2.4.1 自顶向下分析方法
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#242" class="md-nav__link">
+    2.4.2 预测分析法
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#243-epsilon" class="md-nav__link">
+    2.4.3 何时使用 \(\epsilon\) 产生式
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#244" class="md-nav__link">
+    2.4.4 设计一个预测分析器
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#245" class="md-nav__link">
+    2.4.5 左递归
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#25" class="md-nav__link">
+    2.5 简单表达式的翻译器
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5 简单表达式的翻译器">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#251" class="md-nav__link">
+    2.5.1 抽象语法和具体语法
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#252" class="md-nav__link">
+    2.5.2 调整翻译方案
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#253" class="md-nav__link">
+    2.5.3 非终结符号的过程
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#254" class="md-nav__link">
+    2.5.4 翻译器的简化
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#26" class="md-nav__link">
+    2.6 词法分析
+  </a>
+  
+    <nav class="md-nav" aria-label="2.6 词法分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#261" class="md-nav__link">
+    2.6.1 剔除空白和注释
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#262" class="md-nav__link">
+    2.6.2 预读
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#263" class="md-nav__link">
+    2.6.3 常量
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#264" class="md-nav__link">
+    2.6.4 识别关键字和标识符
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#27" class="md-nav__link">
+    2.7 符号表
+  </a>
+  
+    <nav class="md-nav" aria-label="2.7 符号表">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#271" class="md-nav__link">
+    2.7.1 为每个作用域设置一个符号表
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#272" class="md-nav__link">
+    2.7.2 符号表的使用
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#28" class="md-nav__link">
+    2.8 生成中间代码
+  </a>
+  
+    <nav class="md-nav" aria-label="2.8 生成中间代码">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#281" class="md-nav__link">
+    2.8.1 两种中间表示形式
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#282" class="md-nav__link">
+    2.8.2 语法树的构造
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#283" class="md-nav__link">
+    2.8.3 静态检查
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#284" class="md-nav__link">
+    2.8.4 三地址码
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#29-2" class="md-nav__link">
+    2.9 第 2 章总结
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    参考资料
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_03.html" class="md-nav__link">
+        C3 词法分析
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_04.html" class="md-nav__link">
+        C4 语法分析
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_05.html" class="md-nav__link">
+        C5 语法制导的翻译
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_08.html" class="md-nav__link">
+        C8 代码生成和优化
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      <label class="md-nav__link" for="__nav_3">
+        Homework
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Homework" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Homework
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_01.html" class="md-nav__link">
+        hw-01-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_02_01.html" class="md-nav__link">
+        hw-02-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_02_02.html" class="md-nav__link">
+        hw-02-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_03_01.html" class="md-nav__link">
+        hw-03-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_03_02.html" class="md-nav__link">
+        hw-03-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_01.html" class="md-nav__link">
+        hw-04-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_02.html" class="md-nav__link">
+        hw-04-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_03.html" class="md-nav__link">
+        hw-04-03
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    2.1 引言
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    2.2 语法定义
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2 语法定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#221" class="md-nav__link">
+    2.2.1 文法定义
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#222" class="md-nav__link">
+    2.2.2 推导 (归约)*
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#223" class="md-nav__link">
+    2.2.3 语法分析树
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#224" class="md-nav__link">
+    2.2.4 二义性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#225" class="md-nav__link">
+    2.2.5 算符的结合性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#226" class="md-nav__link">
+    2.2.6 算符的优先性
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    2.3 语法制导翻译
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3 语法制导翻译">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#231" class="md-nav__link">
+    2.3.1 后缀表示
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#232" class="md-nav__link">
+    2.3.2 综合属性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#233" class="md-nav__link">
+    2.3.3 简单语法制导定义
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#234" class="md-nav__link">
+    2.3.4 树的遍历
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#235" class="md-nav__link">
+    2.3.5 翻译方案
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#24" class="md-nav__link">
+    2.4 语法分析
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4 语法分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#241" class="md-nav__link">
+    2.4.1 自顶向下分析方法
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#242" class="md-nav__link">
+    2.4.2 预测分析法
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#243-epsilon" class="md-nav__link">
+    2.4.3 何时使用 \(\epsilon\) 产生式
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#244" class="md-nav__link">
+    2.4.4 设计一个预测分析器
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#245" class="md-nav__link">
+    2.4.5 左递归
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#25" class="md-nav__link">
+    2.5 简单表达式的翻译器
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5 简单表达式的翻译器">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#251" class="md-nav__link">
+    2.5.1 抽象语法和具体语法
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#252" class="md-nav__link">
+    2.5.2 调整翻译方案
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#253" class="md-nav__link">
+    2.5.3 非终结符号的过程
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#254" class="md-nav__link">
+    2.5.4 翻译器的简化
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#26" class="md-nav__link">
+    2.6 词法分析
+  </a>
+  
+    <nav class="md-nav" aria-label="2.6 词法分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#261" class="md-nav__link">
+    2.6.1 剔除空白和注释
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#262" class="md-nav__link">
+    2.6.2 预读
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#263" class="md-nav__link">
+    2.6.3 常量
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#264" class="md-nav__link">
+    2.6.4 识别关键字和标识符
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#27" class="md-nav__link">
+    2.7 符号表
+  </a>
+  
+    <nav class="md-nav" aria-label="2.7 符号表">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#271" class="md-nav__link">
+    2.7.1 为每个作用域设置一个符号表
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#272" class="md-nav__link">
+    2.7.2 符号表的使用
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#28" class="md-nav__link">
+    2.8 生成中间代码
+  </a>
+  
+    <nav class="md-nav" aria-label="2.8 生成中间代码">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#281" class="md-nav__link">
+    2.8.1 两种中间表示形式
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#282" class="md-nav__link">
+    2.8.2 语法树的构造
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#283" class="md-nav__link">
+    2.8.3 静态检查
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#284" class="md-nav__link">
+    2.8.4 三地址码
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#29-2" class="md-nav__link">
+    2.9 第 2 章总结
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    参考资料
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/chuan-325/comp-21sp/edit/master/docs/chap_02.md" title="编辑此页" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="c2">C2 一个简单的语法制导翻译器<a class="headerlink" href="#c2" title="Permanent link">&para;</a></h1>
+<h2 id="21">2.1 引言<a class="headerlink" href="#21" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>本节概括性地说明了本章各节的内容, 可以跳过.</p>
+</blockquote>
+<ul>
+<li><strong>语法</strong>: 给出程序<strong>合乎规范</strong>的形式要求 (但是合乎规范 != 正确)</li>
+<li><strong>语义</strong>: 决定了程序的含义</li>
+</ul>
+<p>为简便起见, 本课程主要关心<strong>上下文无关文法</strong> (CFG), 可以描述语言的文法.</p>
+<blockquote>
+<p>实际生产环境中, 很多语言(的特性)其实是上下文有关的, 如 "先声明后使用".</p>
+</blockquote>
+<p>CFG 不仅可以描述一个语言, 而且可以指导程序的翻译过程. 一种面向文法的编译技术是 <strong>语法制导翻译</strong> (syntax-directed translation).</p>
+<p>下图是编译器前端的简易模型:</p>
+<p><img :=":" alt="front-end-model." src="chap_02.assets/front-end-model.png" style="height:150px" /></p>
+<p>本节以中缀表达式-&gt;后缀表达式的语法制导翻译过程来介绍语法分析器.</p>
+<p>词法分析器使得翻译器可以处理由多个字符组成的构造, 比如<strong>标识符</strong>. 标识符由多个字符组成, 但在语法分析阶段被当作一个单元 ("<strong>词法单元</strong> (token)") 进行处理.</p>
+<p>考虑中间代码的生成. 中间代码有两种形式:</p>
+<ul>
+<li>
+<p>抽象语法树 (AST, 又称为语法树)</p>
+<ul>
+<li>表示了程序的层次语法结构</li>
+<li>一般而言, 树的左子树计算先于右子树实现</li>
+<li>语法树是编译器最重要的数据结构, 编译器的大部分工作是伴随着对 AST 的全部和部分的遍历而实施的</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>三地址指令序列<ul>
+<li>形式: <code>x = y op z</code></li>
+<li>2 个运算对象地址+1 个存放结果的地址</li>
+<li>最多一个运算, 一般是计算/比较/分支跳转</li>
+</ul>
+</li>
+</ul>
+<p>两种中间表示的在具体的例子中:</p>
+<p><img :=":" alt="intermediate-code-of-two-forms." src="chap_02.assets/intermediate-code-of-two-forms.png" style="height:230px" /></p>
+<h2 id="22">2.2 语法定义<a class="headerlink" href="#22" title="Permanent link">&para;</a></h2>
+<h3 id="221">2.2.1 文法定义<a class="headerlink" href="#221" title="Permanent link">&para;</a></h3>
+<h4 id="_1">从字母到语言*<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h4>
+<p>(某语言的)字母表: (某语言中)允许出现的一切符号组成的有穷非空集合.</p>
+<p>符号串: 由字母表中的符号组成的有穷序列称为符号串, 一般用小写字母 x,y,z 等表示; 可以是空串 <span class="arithmatex">\(\epsilon\)</span>.</p>
+<ul>
+<li>前缀, 后缀; 真前/后缀(=非空非原串)</li>
+<li>子串 (从原子串删去某个前缀<strong>或/和</strong>后缀); 真子串 (=非空非原串)</li>
+<li>子序列 (从原子串删去任意符号)</li>
+</ul>
+<p>符号串运算:</p>
+<ul>
+<li>连结(concat)</li>
+<li>幂运算 (将连结看成积运算)</li>
+</ul>
+<p>符号串集合运算:</p>
+<ul>
+<li>乘积运算: <span class="arithmatex">\(AB=\{xy|x\in A, y\in B\}\)</span><ul>
+<li><span class="arithmatex">\(\{\epsilon\}A=A\{\epsilon\}\)</span></li>
+</ul>
+</li>
+<li>闭包运算: <span class="arithmatex">\(\Sigma^{*}=\Sigma^0\cup\Sigma^1\cup\Sigma^2\cup\cdots\cup\Sigma^{n}\)</span><ul>
+<li><span class="arithmatex">\(\Sigma^{*}\)</span> 称为集合 <span class="arithmatex">\(\Sigma\)</span> 的 <strong>闭包</strong>, 而 <span class="arithmatex">\(\Sigma^{+}\)</span> 称为集合 <span class="arithmatex">\(\Sigma\)</span> 的正闭包; 因此 <span class="arithmatex">\(\Sigma^{*}=\Sigma^{0}\cup\Sigma^{+}\)</span>, <span class="arithmatex">\(\Sigma^{+}=\Sigma^{*}\Sigma=\Sigma\Sigma^{*}\)</span></li>
+</ul>
+</li>
+</ul>
+<p>句子 (=字): 在语言中, 句子是给定字母表上一个符号串.</p>
+<p>语言: 在给定字母表上一个任意的可数的串集合.</p>
+<h4 id="_2">规则: 构成文法*<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h4>
+<p>例如:</p>
+<div class="arithmatex">\[
+stmt\rightarrow \bf{\text{ if }} (expr)\text{ }stmt\bf{\text{  else }} stmt
+\]</div>
+<p>这样的规则称为 <strong>产生式</strong> (production), 其中:</p>
+<ul>
+<li>箭头 <span class="arithmatex">\(\rightarrow\)</span> 可以读作 "可以具有如下形式"</li>
+<li>像 <span class="arithmatex">\(\text{if}\)</span> 和 <span class="arithmatex">\(\text{()}\)</span> 这样的符号被称为 <strong>终结符号</strong> (terminal)</li>
+<li>像 <span class="arithmatex">\(expr\)</span> 和 <span class="arithmatex">\(stmt\)</span> 这样的变量表示终结符号的序列, 被称为 <strong>非终结符号</strong> (non-terminal)</li>
+</ul>
+<p>对于集合 <span class="arithmatex">\(\Sigma\)</span>, 规则的左部是 <span class="arithmatex">\(\Sigma^{+}\)</span> 中的符号串, 规则的右部则是 <span class="arithmatex">\(\Sigma^{*}\)</span> 中的符号串.</p>
+<blockquote>
+<p>文法在下一 h3 标题下详细介绍.</p>
+</blockquote>
+<h4 id="_3">※文法<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<p>文法 <span class="arithmatex">\(G\)</span> 定义为四元组:</p>
+<div class="arithmatex">\[
+(V_N, V_T, P, S)
+\]</div>
+<p>也可以写成 <span class="arithmatex">\(G[S]\)</span>.</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>含义</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(V_N\)</span></td>
+<td>非终结符号集合</td>
+<td>非空有穷集</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(V_T\)</span></td>
+<td>终结符号集合</td>
+<td>非空有穷集</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(P\)</span></td>
+<td>产生式的集合</td>
+<td>非空有穷集</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S\)</span></td>
+<td>开始符号/识别符号</td>
+<td>非终结符号</td>
+</tr>
+</tbody>
+</table>
+<p>补充:</p>
+<ul>
+<li>作为开始符号, <span class="arithmatex">\(S\)</span> <strong>至少</strong>在一个产生式里作为规则的左部出现</li>
+<li><span class="arithmatex">\(V_N\cap V_T=\emptyset\)</span></li>
+<li><span class="arithmatex">\(V=V_N\cup V_T\)</span> 被称为文法 <span class="arithmatex">\(G\)</span> 的字母表</li>
+</ul>
+<blockquote>
+<p>简单的判定方法: 非终结符一定在产生式左边, 产生式左边也一定是非终结符; 反之则对应右边.</p>
+</blockquote>
+<h3 id="222">2.2.2 推导 (归约)*<a class="headerlink" href="#222" title="Permanent link">&para;</a></h3>
+<ul>
+<li>直接推导: 应用单个产生式 <span class="arithmatex">\(\alpha\rightarrow\beta\)</span> 即可推导到目标串</li>
+<li>长度为 <span class="arithmatex">\(n\)</span> 的推导<ul>
+<li>若存在直接推导的序列 <span class="arithmatex">\(v\rightarrow w_0\rightarrow w_1\rightarrow w_2\rightarrow \cdots\rightarrow w_n=w\)</span> , 则称 <span class="arithmatex">\(v\)</span> 推导产生 <span class="arithmatex">\(w\)</span> 的推到长度为 <span class="arithmatex">\(n\)</span> / <span class="arithmatex">\(w\)</span> 归约到 <span class="arithmatex">\(v\)</span></li>
+<li>记作 <span class="arithmatex">\(v\overset{+}\Rightarrow w\)</span></li>
+<li>若有 <span class="arithmatex">\(v\overset\Rightarrow w\)</span> 或 <span class="arithmatex">\(v=w\)</span>, 记作 <span class="arithmatex">\(v\overset{*}\Rightarrow w\)</span></li>
+</ul>
+</li>
+</ul>
+<h4 id="_4">句型和句子*<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
+<p>句型: 设 <span class="arithmatex">\(G[S]\)</span> 是一个文法, 如果符号串 <span class="arithmatex">\(x\)</span> 是从开始符号 <span class="arithmatex">\(S\)</span> 推导出来的, 即有 <span class="arithmatex">\(S\overset{+}\Rightarrow x\)</span> 则称 <span class="arithmatex">\(x\)</span> 是文法 <span class="arithmatex">\(G[S]\)</span> 的句型.</p>
+<p>句子: 若推导出的符号串 <span class="arithmatex">\(x\)</span> 仅由终结符号组成, 即 <span class="arithmatex">\(x\in V_T^{*}\)</span>, 则称 <span class="arithmatex">\(x\)</span> 为 <span class="arithmatex">\(G[S]\)</span> 的句子.</p>
+<h4 id="_5">语言*<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<p>语言: 文法 <span class="arithmatex">\(G\)</span> 产生的语言记作:</p>
+<div class="arithmatex">\[
+\bf{L(G)}=\{x|S\overset{*}\Rightarrow x, x\in V_T^{*}, S\text{ 为文法的开始符号}\}
+\]</div>
+<p>借助语言可以定义文法的等价:</p>
+<ul>
+<li><span class="arithmatex">\(L(G)=L(G^{\prime})\Rightarrow\)</span> 文法 <span class="arithmatex">\(G\)</span> 和文法 <span class="arithmatex">\(G^{\prime}\)</span> 等价</li>
+<li>两个文法等价=从两个文法得到的语言的句子结构等价!=含义等价</li>
+</ul>
+<blockquote>
+<p><strong>扩展</strong>: Chomsky 语言族</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Description</th>
+<th>Equivalent Instance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 型文法</td>
+<td>短语结构文法/ PSG</td>
+<td>图灵机 (TM)</td>
+</tr>
+<tr>
+<td>1 型文法</td>
+<td>上下文有关文法/ CSG</td>
+<td>线性界限自动机 (LBA)</td>
+</tr>
+<tr>
+<td>2 型文法</td>
+<td>上下文无关文法/ CFG</td>
+<td>下推自动机 (PDA)/ BNF 形式</td>
+</tr>
+<tr>
+<td>3 型文法</td>
+<td>正则文法/ RG</td>
+<td>有穷状态自动机 (FSM)</td>
+</tr>
+</tbody>
+</table>
+<p>0 型语言类 <span class="arithmatex">\(\supset\)</span> 1 型语言类 <span class="arithmatex">\(\supset\)</span> 2 型语言类 <span class="arithmatex">\(\supset\)</span> 3 型语言类, 即表达能力递减.</p>
+</blockquote>
+<h4 id="_6">语言的运算*<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
+<p>设 <span class="arithmatex">\(L, L_1, L_2\)</span> 分别是定义在字母表 <span class="arithmatex">\(\Sigma, \Sigma_1, \Sigma_2\)</span>.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>并</td>
+<td><span class="arithmatex">\(L_1\cup L_2=\{x \lvert x\in L_1, \text{or }x\in L_2\}\)</span></td>
+</tr>
+<tr>
+<td>交</td>
+<td><span class="arithmatex">\(L_1\cap L_2=\{x \lvert x\in L_1, \text{and }x\in L_2\}\)</span></td>
+</tr>
+<tr>
+<td>补</td>
+<td><span class="arithmatex">\(\overline{L}=\{x \lvert x\in \Sigma^{*}, \text{and }x\notin L\}\)</span></td>
+</tr>
+<tr>
+<td>积</td>
+<td><span class="arithmatex">\(L_1L_2=\{xy \lvert x\in L_1, \text{and }y\in L_2\}\)</span></td>
+</tr>
+<tr>
+<td>幂</td>
+<td><span class="arithmatex">\(L^0=\{\epsilon\}\)</span>, <span class="arithmatex">\(L^n=L^{n-1}L=LL^{n-1}, n\geq 1\)</span></td>
+</tr>
+<tr>
+<td>闭包</td>
+<td><span class="arithmatex">\(L^{*}=\bigcup_{i=0}^{\infty} L^i\)</span></td>
+</tr>
+<tr>
+<td>正闭包</td>
+<td><span class="arithmatex">\(L^{+}=\bigcup_{i=1}^{\infty} L^i\)</span></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>由最后两行, 显然可知:</p>
+<ul>
+<li><span class="arithmatex">\(\{\epsilon\}L=L\{\epsilon\}=L\)</span></li>
+<li><span class="arithmatex">\(\emptyset\cup L=L\cup\emptyset=L\)</span></li>
+<li><span class="arithmatex">\(L^{+}=LL^{*}=L^{*}L\)</span></li>
+</ul>
+</blockquote>
+<h4 id="_7">语言类对运算的封闭性*<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<p><strong>封闭性</strong>: 对于某个给定的语言类中的语言, 如果进行某种运算后得到的新语言与原有语言有相同的语言类, 则称<strong>该语言类对该运算是封闭的</strong>, 否则称该语言类对该运算是不封闭的.</p>
+<ul>
+<li>各型语言对 <strong>并/ 积/ 闭包</strong> 运算均封闭;</li>
+<li>2 型语言 (上下文无关语言) 对 <strong>交/ 补</strong> 运算不封闭;</li>
+<li>3 型语言 (正则语言) 对 <strong>交/ 补</strong> 运算封闭 (形成一个布尔代数).</li>
+</ul>
+<h4 id="_8">文法与程序分析<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
+<ul>
+<li>编译器的词法: 3 型文法 (RG)</li>
+<li>编译器的语法: 2 型文法 (CFG)</li>
+</ul>
+<h3 id="223">2.2.3 语法分析树<a class="headerlink" href="#223" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p><strong>语法分析</strong> (parsing) 的任务是: 接受一个终结符号串作为输入, 找出从文法的开始符号推导出这个串的方法.</p>
+<ul>
+<li>如果不能从文法的开始符号推导得到该终结符号串, 则报告该终结符号串中包含的语法错误.</li>
+</ul>
+</blockquote>
+<p><strong>语法分析树</strong>: 用图形的方式展现了程序的语法结构, 树的每个结点代表了一个文法符号.</p>
+<p><strong>语法树的构建过程</strong>表征了语法分析的过程.</p>
+<p>语法树可以有多个<strong>结点</strong> (node), 但是只有一个根结点, 其标号是文法的开始符号.</p>
+<ul>
+<li>每个叶子结点的符号是一个终结符号或者 <span class="arithmatex">\(\epsilon\)</span>,</li>
+<li>每个内部结点 (非叶结点) 的符号是一个非终结符号.</li>
+</ul>
+<p>以 A 为根结点, <span class="arithmatex">\(x_1, \cdots, x_n\)</span> 为叶结点的子树对应产生式 <span class="arithmatex">\(A\rightarrow x_1\cdots x_n\)</span>; 因此, 自左向右将语法树的所有叶结点依次连接, 就可以得到符合文法的一个句子, 称为树的 <strong>结果</strong> (yield).</p>
+<blockquote>
+<p>Try: 产生式 <span class="arithmatex">\(A\rightarrow\epsilon\)</span> 对应的子树形状是?</p>
+</blockquote>
+<p>任何树的叶子结点都有一个自然的从左到右的顺序.</p>
+<blockquote>
+<p>Intuition: 若 <code>x</code> 和 <code>y</code> 是同一个父结点的子结点, 并且 <code>x</code> 在 <code>y</code> 的左边, 则 <code>x</code> 的所有后代结点都在 <code>y</code> 的所有后代结点的左边.</p>
+</blockquote>
+<h3 id="224">2.2.4 二义性<a class="headerlink" href="#224" title="Permanent link">&para;</a></h3>
+<p>如果一个文法, 对于同一个终结符号串, 存在两个或多个与之对应的语法树, 则称该文法具有<strong>二义性</strong> (ambiguity).</p>
+<p>注意:</p>
+<ul>
+<li>"多棵语法树" 不是指有多个推导, 因为即便只有一棵语法树, 也可以有最左/最右等推导</li>
+<li>只要有一个句子对应了多棵语法树, 即为二义性文法</li>
+</ul>
+<p>二义性往往导致程序可能具有多种含义, 使得编译器的工作难以顺利进行, 所以要排除二义性</p>
+<blockquote>
+<p>二义性带来的麻烦: 如算符的优先顺序/结合性, <code>if-then-else</code> 的匹配等</p>
+</blockquote>
+<h3 id="225">2.2.5 算符的结合性<a class="headerlink" href="#225" title="Permanent link">&para;</a></h3>
+<p>结合性举例:</p>
+<ul>
+<li><code>+, -, *, /</code> 是左结合的</li>
+<li><code>乘幂/赋值</code> 是右结合的</li>
+</ul>
+<p>如下比较了左结合运算符和右结合运算符的语法分析树, 可以看到, 左 (右) 结合运算符将向左 (右) 下端延伸.</p>
+<p><img :=":" alt="two-parser-tree-for-a-simple-string." src="chap_02.assets/two-parser-tree-for-a-simple-string.png" style="height:200px" /></p>
+<h3 id="226">2.2.6 算符的优先性<a class="headerlink" href="#226" title="Permanent link">&para;</a></h3>
+<p>优先性举例:</p>
+<ul>
+<li>通常 <code>*, /</code> 优先于 <code>+, -</code></li>
+</ul>
+<p>※在表达式文法中, 若具有 <span class="arithmatex">\(n\)</span> 层优先级, 则需要 <span class="arithmatex">\(n+1\)</span> 个非终结符号.</p>
+<h2 id="23">2.3 语法制导翻译<a class="headerlink" href="#23" title="Permanent link">&para;</a></h2>
+<p>语法制导翻译是将语义动作与产生式关联的方式.</p>
+<p><strong>属性</strong> (attribute): 属性表示与某个程序构造相关的任意的量.</p>
+<ul>
+<li>属性与文法符号相关联;</li>
+<li>每个文法符号可以有多个属性, 可以用一个属性集合来表示</li>
+</ul>
+<blockquote>
+<p>属性可以是多种多样的, 比如:</p>
+<ul>
+<li>表达式的数据类型</li>
+<li>生成的代码中的指令数目
+  为某个构造生成的代码中第一条指令的位置等等都是属性的例子.</li>
+</ul>
+<p>因为我们用文法符号 (终结符号或非终结符号) 来表示程序构造, 所以我们将属性的概念从程序构造扩展到表示这些构造的文法符号上.</p>
+</blockquote>
+<p>(语法制导的) <strong>翻译方案</strong> (translation scheme): 翻译方案是一种将程序片段附加到一个文法的各个产生式上的表示法.</p>
+<blockquote>
+<ul>
+<li>当在语法分析过程中使用一个产生式时, 相应的程序片段就会执行.</li>
+<li>将这些程序片段的执行效果按照语法分析过程的顺序组合起来, 得到的结果就是这次分析/综合过程处理源程序得到的翻译结果.</li>
+</ul>
+</blockquote>
+<h3 id="231">2.3.1 后缀表示<a class="headerlink" href="#231" title="Permanent link">&para;</a></h3>
+<p><strong>后缀表示</strong>(postfix notation):</p>
+<ul>
+<li>如果 <span class="arithmatex">\(E\)</span> 是一个变量或常量, 则 <span class="arithmatex">\(E\)</span> 的后缀表示就是 <span class="arithmatex">\(E\)</span> 本身</li>
+<li>如果 <span class="arithmatex">\(E\)</span> 是一个形如 <span class="arithmatex">\(E_1 {\rm op} E_2\)</span> 的表达式 (op 是二目算符), 则其后缀表示是 <span class="arithmatex">\(E_1^{\prime}E_2^{\prime}{\rm op}\)</span>, 其中 <span class="arithmatex">\(E_1^{\prime}\)</span> 和 <span class="arithmatex">\(E_2^{\prime}\)</span> 分别是 <span class="arithmatex">\(E_1\)</span> 和 <span class="arithmatex">\(E_2\)</span> 的后缀表示</li>
+<li>如果 <span class="arithmatex">\(E\)</span> 是一个形如 <span class="arithmatex">\((E_1)\)</span> 的表达式, 则其后缀表示就是 <span class="arithmatex">\(E_1\)</span> 的后缀表示</li>
+</ul>
+<blockquote>
+<p>后缀表示不用括号, 便于用栈实现计算.</p>
+</blockquote>
+<h3 id="232">2.3.2 综合属性<a class="headerlink" href="#232" title="Permanent link">&para;</a></h3>
+<p>属性的计算是有约束的.</p>
+<p><strong>语法制导定义</strong> (syntax-directed definition):</p>
+<ol>
+<li>把<strong>文法符号</strong>与<strong>属性集合</strong>相关联;</li>
+<li>把<strong>产生式</strong>与<strong>语义规则</strong>相关联;<ul>
+<li><strong>语义规则</strong> (semantic rule): 用于计算与该产生式中符号相关联的属性值.</li>
+</ul>
+</li>
+</ol>
+<p><strong>注释语法分析树</strong>: 如果一棵语法分析树的各个结点上标记了相应的属性值, 那么这棵语法分析树就称为注释语法分析树 (annotated AST, 简称注释分析树).</p>
+<p>如下即为一棵注释分析树:</p>
+<p><img :=":" alt="annotated-ast" src="chap_02.assets/annotated-ast.png" style="height:250px" /></p>
+<blockquote>
+<p>语义规则的计算也称为对语法树的注释, 得到的就是注释分析树.</p>
+</blockquote>
+<p><strong>综合属性</strong>: 如果语法树上结点 <span class="arithmatex">\(N\)</span> 的某个属性值是由 <span class="arithmatex">\(N\)</span> 的子结点<strong>和/或</strong> <span class="arithmatex">\(N\)</span> 自身的属性值确定, 则称这个属性为综合属性.</p>
+<blockquote>
+<p>若 <span class="arithmatex">\(s\)</span> 是 <span class="arithmatex">\(X\)</span> 的属性, <span class="arithmatex">\(t_1,\cdots, t_m\)</span> 是 <span class="arithmatex">\(Y_1,\cdots,Y_n\)</span> 或 <span class="arithmatex">\(X\)</span> 的属性, 且属性 <span class="arithmatex">\(s:=f(t_1,\cdots, t_m)\)</span>, 则 <span class="arithmatex">\(s\)</span> 是 <span class="arithmatex">\(X\)</span> 的综合属性.</p>
+</blockquote>
+<p><strong>※综合属性的性质</strong>: 只需要对语法分析树进行一次自底向上的遍历(i.e. 后序遍历), 就可以计算出属性的值.</p>
+<blockquote>
+<p>继承属性: 如果结点 <span class="arithmatex">\(N\)</span> 的某个属性计算需要用到其兄弟结点 or 父结点的属性值, 则称为继承属性.</p>
+</blockquote>
+<p>下面给出 "中缀表示 to 后缀表示" 这一翻译过程的 <strong>语法制导定义</strong>:</p>
+<p><img :=":" alt="syntax-directed-def-for-infix-to-postfix-translation" src="chap_02.assets/syntax-directed-def-for-infix-to-postfix-translation.png" style="height:200px" /></p>
+<p>以第一行为例,</p>
+<div class="arithmatex">\[
+expr\rightarrow expr_1+term
+\]</div>
+<p>推导出一个带有加号的表达式,</p>
+<ul>
+<li>左运算分量由 <span class="arithmatex">\(expr_1\)</span> 给出</li>
+<li>右运算分量由 <span class="arithmatex">\(term\)</span> 给出</li>
+</ul>
+<p>与这个产生式 <strong>关联</strong> 的 <strong>语义规则</strong></p>
+<div class="arithmatex">\[
+expr.t = expr_1.t\ |\ term.t\ |\ \text{'+'}
+\]</div>
+<p>定义了计算属性 <span class="arithmatex">\(expr.t\)</span> 的值的方式: 将左/右运算分量 (<span class="arithmatex">\(expr_1\)</span> 和 <span class="arithmatex">\(term\)</span>) 的后缀表示形式 (<span class="arithmatex">\(expr_1.t\)</span> 和 <span class="arithmatex">\(term.t\)</span>) 连接起来, 再在后面加上加号.</p>
+<h3 id="233">2.3.3 简单语法制导定义<a class="headerlink" href="#233" title="Permanent link">&para;</a></h3>
+<p><strong>简单 (simple) 语法制导</strong>的定义:</p>
+<ul>
+<li>要得到代表产生式头部的非终结符号的翻译结果的字符串, 只需要将产生式右部中各非终结符的翻译, 结果<strong>按照它们出现的次序连接</strong>, 并在其中穿插一些附加的串, 就可以得到产生式左部非终结符的翻译结果;</li>
+<li>最终根结点的 <span class="arithmatex">\(t\)</span> 属性记录了翻译结果</li>
+</ul>
+<h3 id="234">2.3.4 树的遍历<a class="headerlink" href="#234" title="Permanent link">&para;</a></h3>
+<p>树的 <strong>遍历</strong> (traversal): 从根结点开始, 并按照某个顺序访问树的各个结点.</p>
+<blockquote>
+<p>深度优先: 从根结点开始递归访问各个结点的子结点. 可先序/后序.</p>
+</blockquote>
+<p>语法制导定义未指明属性计算的次序, 因此只要保证计算某个属性 <span class="arithmatex">\(a\)</span> 的值时, 其所依赖的属性都已计算完成即可.</p>
+<ul>
+<li>对于那些需要与语法分析同时完成的属性计算, 计算次序选择受到了一定的约束</li>
+<li>程序处理的自然顺序是从前向后扫描程序, 语法分析时对产生式的处理是从左到右的; 对应到语法树, 也是从左向右同一父结点的各个子结点</li>
+</ul>
+<p>对于一个综合属性, 可以按照深度优先后序遍历的顺序计算, 即自底向上的翻译, 这与上一节讨论的顺序是一致的.</p>
+<h3 id="235">2.3.5 翻译方案<a class="headerlink" href="#235" title="Permanent link">&para;</a></h3>
+<p>在 <a href="#232">2.3.2</a> 节刻画的语法制导定义是这样翻译的: 将字符串作为属性值, 附加在语法分析树的结点上, 从而得到翻译结果.</p>
+<p>下面考虑一种不需要操作字符串的方法: 它通过运行程序片段, 逐步生成相同的翻译结果.</p>
+<p><strong>语法制导翻译方案</strong>是一种在文法产生式中附加一些程序片段来描述翻译结果的表示方法. 语法制导翻译方案和语法制导定义相似, 只是<strong>显式指定了语义规则的计算顺序</strong>.</p>
+<p>被嵌入到产生式体中的程序片段被称为 <strong>语义动作</strong> (semantic action). 一个语义动作用花括号括起来, 并写入产生式体, 它的执行位置也由此指定.</p>
+<p>考虑如下的规则:</p>
+<div class="arithmatex">\[
+rest\rightarrow \text{'+'}\ term\ |\text{ print('+') }|\ rest_1
+\]</div>
+<p>对应地为语义动作创建一个额外的叶子结点:</p>
+<p><img :=":" alt="an-extra-leaf-is-constructed-for-a-semantic-action" src="chap_02.assets/an-extra-leaf-is-constructed-for-a-semantic-action.png" style="height:100px" /></p>
+<p>对于 "<code>9-5+2</code> to <code>95-2+</code>" 这一中缀表示翻译到后缀表示的过程, 有如下的语义动作: (根结点是 <code>9-5+2</code>, 下面翻译出了 <code>95-2+</code>:</p>
+<p><img :=":" alt="semantic-actions-in-translating-infix2postfix" src="chap_02.assets/semantic-actions-in-translating-infix2postfix.png" style="height:200px" /></p>
+<p>更一般地, 表达式从中缀表示翻译成后缀表示的语义动作如下:</p>
+<p><img :=":" alt="actions-for-translating-into-postfix-notation" src="chap_02.assets/actions-for-translating-into-postfix-notation.png" style="height:180px" /></p>
+<p>注意! 使用语义动作的方式时, 不需要任何附加空间来存放子表达式的翻译结果, 因此在增量输出时, 字符的打印顺序非常重要: 必须保证各个语义动作按照它们在语法分析树的后序遍历顺序执行.</p>
+<blockquote>
+<p><strong>比较</strong>: 语义规则 vs 语义动作</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>语义规则</th>
+<th>语义动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>额外空间</td>
+<td>需要, 存放子表达式翻译结果</td>
+<td>不需要</td>
+</tr>
+<tr>
+<td>操作字符串?</td>
+<td>需要</td>
+<td>不需要, 依赖 "动作"</td>
+</tr>
+<tr>
+<td>顺序?</td>
+<td>一般后序, 无要求</td>
+<td>后序遍历地实现语义动作</td>
+</tr>
+<tr>
+<td>语法分析树结点</td>
+<td>+属性值, (=翻译结果)</td>
+<td>需增加语义动作结点</td>
+</tr>
+</tbody>
+</table>
+<p>两者都是翻译方案, 在案例中也给出了相同的结果, 但是构造结果的过程是不同的:</p>
+<ul>
+<li>语义规则: 把字符串 (翻译[中间]结果) 作为属性附加到语法分析树中的结点上</li>
+<li>语义动作: 通过语义动作把翻译结果以<strong>增量</strong>方式打印出来</li>
+</ul>
+</blockquote>
+<h2 id="24">2.4 语法分析<a class="headerlink" href="#24" title="Permanent link">&para;</a></h2>
+<p>语法分析是决定如何使用一个文法生成一个终结符号串的过程.</p>
+<p>多数语法分析方法都可以按 <strong>语法分析树结点的构造顺序</strong> 归入以下两类:</p>
+<ul>
+<li><strong>自顶向下</strong> (top-down) 方法<ul>
+<li>构造过程从根结点开始, 逐步向叶子结点方向进行</li>
+<li>可以较容易地手工构造出高效的语法分析器; 但要避免回溯/消除左递归/消除左因子等</li>
+<li>典型: 递归下降, LL 分析等</li>
+</ul>
+</li>
+<li><strong>自底向上</strong> (bottom-up) 方法:<ul>
+<li>构造过程从叶子结点开始, 逐步构造出根结点</li>
+<li>构造复杂, 但可以处理更多种文法和翻译方案</li>
+<li>直接从文法生成语法分析器的软件工具常常使用自底向上的方法</li>
+<li>典型: 算符优先, LR 分析等</li>
+</ul>
+</li>
+</ul>
+<h3 id="241">2.4.1 自顶向下分析方法<a class="headerlink" href="#241" title="Permanent link">&para;</a></h3>
+<p>不是所有的文法都适合采用自顶向下的方法.</p>
+<p>如何<strong>自顶向下地构造一棵语法分析树</strong>?</p>
+<ul>
+<li>从标号为 <strong>开始非终结符</strong> <span class="arithmatex">\(stmt\)</span> 的根结点开始, 反复执行如下步骤:<ol>
+<li>在标号为非终结符号 <span class="arithmatex">\(A\)</span> 的结点 <span class="arithmatex">\(N\)</span> 上, 选择 <span class="arithmatex">\(A\)</span> 的一个产生式, 并为该产生式体中的各个符号构造出 <span class="arithmatex">\(N\)</span> 的子结点;</li>
+<li>需找下一个结点来构造子树, 通常选择的是语法分析树最左边的尚未扩展的非终结符.</li>
+</ol>
+</li>
+</ul>
+<p><strong>向前看</strong> (lookahead) 符号: 输入中当前被扫描的终结符号.</p>
+<blockquote>
+<p>对于某些文法, 上面的步骤只需要对输入串执行一次自左至右的扫描即可. 在这种情况下, 向前看符号是输入串最左的终结符号.</p>
+</blockquote>
+<h4 id="_9">实例: 从左到右扫描输入串时进行自顶向下语法分析<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h4>
+<p>规则:</p>
+<p><img :=":" alt="a-grammar-for-some-stmt-in-c-and-java" src="chap_02.assets/a-grammar-for-some-stmt-in-c-and-java.png" style="height:150px" /></p>
+<p>对输入串的自顶向下语法分析过程:</p>
+<p><img :=":" alt="top-down-parsing-while-scanning-for-input-left-to-right" src="chap_02.assets/top-down-parsing-while-scanning-for-input-left-to-right.png" style="height:400px" /></p>
+<ul>
+<li>图 (a): 扫描到 <code>for</code><ul>
+<li>只有唯一的产生式选择, 于是按这一条扩展结点;</li>
+<li>扩展完毕后, 指向该结点的最左子结点</li>
+</ul>
+</li>
+<li>图 (b): 正在考虑的语法分析树结点是一个终结符号<ul>
+<li><strong>向前看符号</strong> 与 <strong>正在分析的终结符号</strong> 匹配, 于是输入箭头和语法分析树箭头都前进一步</li>
+</ul>
+</li>
+<li>图 (c): <code>(</code> 符号匹配, 前进<ul>
+<li>遇到需要 <span class="arithmatex">\(\epsilon\)</span> 的情况 ( <span class="arithmatex">\(\epsilon\)</span> 被视为 no-match 情况下 default)</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>一个产生式 "不合适" 是指使用了该产生式之后, 我们无法构造得到一棵与当前输入串相匹配的语法分析树.</p>
+</blockquote>
+<p>自顶向下分析中, 为一个非终结符号选择产生式是一个 "尝试并犯错" 的过程: 首先选择一个产生式, 并在这个产生式不合适时进行回溯, 再尝试另一个产生式. 但是, 在被称为预测语法分析的特殊情形下不需要进行回溯.</p>
+<h3 id="242">2.4.2 预测分析法<a class="headerlink" href="#242" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>递归下降分析方法 (recursive-descent parsing) 是一种自顶向下的语法分析方法, 它使用一组递归过程来处理输入; 文法的每个非终结符都有一个相关联的过程, 完成对这个文法符号的分析工作, 过程的调用序列隐式的定义了对应输入串的语法树.</p>
+</blockquote>
+<p><strong>预测分析法</strong> (predictive parsing) 是递归下降分析法的一种简单形式:</p>
+<ol>
+<li>各个非终结符号对应的过程中的控制流可以由向前看符号无二义地确定;</li>
+<li>在分析输入串时出现的过程调用序列隐式地定义了该输入串的一棵语法分析树;<ul>
+<li>如果需要, 还可以通过这些过程调用来构建一个显式的语法分析树.</li>
+</ul>
+</li>
+</ol>
+<p>相比于前一小节提到的最平凡的自顶向下分析法, 预测分析法<strong>增加了一个过程: <code>match</code></strong>.</p>
+<p><code>match</code> 判别正在构建的语法树当前结点的终结符号是否与向前看的符号匹配,</p>
+<ul>
+<li>如果匹配, 则推进向前看符号;</li>
+<li>如果不匹配, 要报错.</li>
+</ul>
+<h4 id="_10">实例: 使用预测分析器分析输入串<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h4>
+<p><img :=":" alt="pseudocode-for-a-predictive-parser" src="chap_02.assets/pseudocode-for-a-predictive-parser.png" style="height:400px" /></p>
+<p>图中的预测分析器包含了两个过程 <code>stmt()</code> 和 <code>optexpr()</code>, 分别对应于 <a href="#241">图 2-16</a> 中文法的非终结符号 <span class="arithmatex">\(stmt\)</span> 和 <span class="arithmatex">\(optexpr\)</span>. 该分析器还包括一个额外的过程 <code>match</code>. 这个额外过程用来简化 <code>stmt</code> 和 <code>optexpr</code> 的代码.</p>
+<h4 id="_11">在一个结点有多个可选的产生式的情形<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h4>
+<p>预测分析需要知道哪些符号可能成为产生式体所生成串的第一个符号. 于是引入记号 <strong><span class="arithmatex">\(FIRST(\alpha)\)</span></strong>:</p>
+<ul>
+<li><span class="arithmatex">\(\alpha\)</span> 是一个文法符号串 (终结符号/非终结符号组成)</li>
+<li><span class="arithmatex">\(FIRST(\alpha)\)</span> 是可以由 <span class="arithmatex">\(\alpha\)</span> 生成的一个 or 多个终结符号串的第一个符号的集合.<ul>
+<li>如果 <span class="arithmatex">\(\alpha\overset{*}\epsilon\)</span>, 则 <span class="arithmatex">\(\epsilon\in FIRST(\alpha)\)</span></li>
+</ul>
+</li>
+</ul>
+<p>如果有两个产生式 <span class="arithmatex">\(A\rightarrow\alpha\)</span> 和 <span class="arithmatex">\(A\rightarrow\beta\)</span>, 且不考虑 <span class="arithmatex">\(\epsilon\)</span> 产生式, 预测分析法要求 <span class="arithmatex">\(FIRST(\alpha)\cap FIRST(\beta)=\emptyset\)</span>, 则可以通过向前看符号来确定应该使用哪个产生式:</p>
+<ul>
+<li>若向前看符号在 <span class="arithmatex">\(FIRST(\alpha)\)</span> 中, 就使用 <span class="arithmatex">\(\alpha\)</span>;</li>
+<li>若向前看符号在 <span class="arithmatex">\(FIRST(\beta)\)</span> 中, 就使用 <span class="arithmatex">\(\beta\)</span>.</li>
+</ul>
+<h3 id="243-epsilon">2.4.3 何时使用 <span class="arithmatex">\(\epsilon\)</span> 产生式<a class="headerlink" href="#243-epsilon" title="Permanent link">&para;</a></h3>
+<p>预测分析器没有其他产生式可用时, 将 <span class="arithmatex">\(\epsilon\)</span> 产生式作为默认选择使用.</p>
+<blockquote>
+<p>在前面的例子中, 对 <code>optexpr</code> 进行语法分析时, 如果向前看符号不在 <span class="arithmatex">\(FIRST(expr)\)</span> 中, 我们就使用 <span class="arithmatex">\(\epsilon\)</span> 产生式.</p>
+</blockquote>
+<h3 id="244">2.4.4 设计一个预测分析器<a class="headerlink" href="#244" title="Permanent link">&para;</a></h3>
+<p><a href="#242">2.4.2</a> 节中非正式介绍的技术可以被推广应用到任意具有如下<strong>性质</strong>的文法上: <strong>对于文法的任何非终结符号, 它的各个产生式体的 <span class="arithmatex">\(FIRST\)</span> 集合互不相交</strong>.</p>
+<p>一个 <strong>预测分析器</strong> (predictive parser) 程序由各个非终结符对应的过程组成; 对于非终结符 <span class="arithmatex">\(A\)</span> 的处理过程:</p>
+<ul>
+<li>检查向前看符号, 决定使用 <span class="arithmatex">\(A\)</span> 的哪个产生式:<ul>
+<li>如果向前看的符号在某个产生式 <span class="arithmatex">\(A\rightarrow\alpha\)</span> 右部的 <span class="arithmatex">\(FIRST(\alpha)\)</span> 中, 采用这个产生式,</li>
+<li>如果有 <span class="arithmatex">\(A\rightarrow\epsilon\)</span> 产生式, 则只有向前看的符号<strong>不在以 <span class="arithmatex">\(A\)</span> 为左部的任何产生式的右部的 <span class="arithmatex">\(FIRST\)</span> 集合中</strong>时, 才采用;</li>
+</ul>
+</li>
+<li>在过程中模拟被选中产生式的右部, 即依次 "执行" 右部的每个文法符号:<ul>
+<li>对于非终结符, 就是调用对应的过程,</li>
+<li>对于终结符, 就是与向前看符号匹配, 然后读入下一个输入符号;</li>
+</ul>
+</li>
+<li>无法继续处理时, 报错:<ul>
+<li>找不到合适的产生式,</li>
+<li>当前结点的终结符与向前看符号不匹配.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>就像通过扩展文法 (增加语义动作) 来得到一个翻译方案一样, 也可以通过扩展一个预测分析器来获得一个语法制导的翻译器.</p>
+<p>根据翻译方案, 扩展预测分析器得到语法制导翻译器的一个简易过程:</p>
+<ol>
+<li>先不考虑产生式中的语义动作, 构造一个预测分析器;</li>
+<li>将翻译方案中的动作拷贝到语法分析器中.<ul>
+<li>如果一个动作出现在产生式 <span class="arithmatex">\(p\)</span> 中的文法符号 <span class="arithmatex">\(X\)</span> 的后面, 则该动作被拷贝到 <span class="arithmatex">\(p\)</span> 的代码中 <span class="arithmatex">\(X\)</span> 的实现之后</li>
+<li>如果一个动作出现在产生式 <span class="arithmatex">\(p\)</span> 的开头, 则该动作被拷贝到产生式体 <span class="arithmatex">\(p\)</span> 的实现代码之前</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<p>如果已经有一个增加了语义动作的文法 (翻译方案), 则可以将这些语义动作当作该语法分析器的过程的一部分执行, 从而得到一个翻译器.</p>
+<h3 id="245">2.4.5 左递归<a class="headerlink" href="#245" title="Permanent link">&para;</a></h3>
+<p>会产生左递归的:</p>
+<div class="arithmatex">\[
+A\rightarrow A\alpha\ |\ \beta
+\]</div>
+<p>改写消除左递归:</p>
+<div class="arithmatex">\[
+A\rightarrow \beta R\\
+R\rightarrow \alpha R\ |\ \epsilon
+\]</div>
+<p>改写中使用的右递归的 <span class="arithmatex">\(R\rightarrow\alpha R\)</span> 来消除左递归.</p>
+<h2 id="25">2.5 简单表达式的翻译器<a class="headerlink" href="#25" title="Permanent link">&para;</a></h2>
+<p>语法制导翻译方案常常作为翻译器的规约. 使用预测分析器时, 有时需要修改一个给定翻译方案的基础文法, 尤其是需要规避左递归的时候.</p>
+<p>挑战:</p>
+<ol>
+<li>需要能支持翻译规约的文法</li>
+<li>需要能支持语法分析过程的文法</li>
+</ol>
+<p>Solution:</p>
+<ol>
+<li>首先使用易于翻译的文法</li>
+<li>转换该文法, 使其支持语法分析</li>
+</ol>
+<blockquote>
+<p><strong>比较</strong>: 语法制导翻译 vs 语法分析</p>
+<ul>
+<li>语法制导翻译是<strong>将语义动作与产生式关联</strong>的方式</li>
+<li>语法分析是决定<strong>如何使用一个文法生成一个终结符号串</strong>的过程</li>
+</ul>
+<p>(显然我还是没懂)</p>
+</blockquote>
+<h3 id="251">2.5.1 抽象语法和具体语法<a class="headerlink" href="#251" title="Permanent link">&para;</a></h3>
+<p>语法树的两种形式:</p>
+<ul>
+<li>语法分析树<ul>
+<li>内部结点是文法的非终结符, 叶结点是终结符</li>
+<li>所有的叶结点依次相连, 就构成了对应的句子</li>
+<li>结点数目多</li>
+</ul>
+</li>
+<li><strong>※抽象语法树</strong> (AST)<ul>
+<li>编译常用的数据结构, <strong>内部结点</strong> 对应 <strong>算符</strong> (如 <code>+/-</code> 等), 算符的子结点对应了该算符的运算对象</li>
+<li>没有形如 <span class="arithmatex">\(expr\rightarrow term\)</span> 的单产生式对应的结点, 也没有 <span class="arithmatex">\(\epsilon\)</span> 产生式对应的结点</li>
+<li>结点数目少</li>
+</ul>
+</li>
+</ul>
+<h3 id="252">2.5.2 调整翻译方案<a class="headerlink" href="#252" title="Permanent link">&para;</a></h3>
+<p><a href="#235">2.3.5 节</a> 中的翻译方案虽然简明, 但是会造成左递归, 而这是语法分析器无法处理的情形, 因此需要用 <a href="#245">2.4.5 节</a> 中提到的方法消除左递归.</p>
+<p>消除左递归的过程涉及适当地调整嵌入的语义动作.</p>
+<h3 id="253">2.5.3 非终结符号的过程<a class="headerlink" href="#253" title="Permanent link">&para;</a></h3>
+<p>借鉴前面的过程, 将非终结符号视为 "过程" 是合理的, 这种函数模拟了非终结符号的产生式体.</p>
+<p><strong>例子</strong>:</p>
+<p><img :=":" alt="pseudocode-for-nonterminals" src="chap_02.assets/pseudocode-for-nonterminals.png" style="height:400px" /></p>
+<h3 id="254">2.5.4 翻译器的简化<a class="headerlink" href="#254" title="Permanent link">&para;</a></h3>
+<p>递归可以优化为迭代, 提高程序的效率. (主要是指尾递归...)</p>
+<p><strong>例子</strong>: <a href="#253">2.5.3 节</a> 中的 <code>rest</code> 过程, 可以修改为:</p>
+<p><img :=":" alt="eliminating-tail-recursion-in-rest" src="chap_02.assets/eliminating-tail-recursion-in-rest.png" style="height:200px" /></p>
+<p>此外, 将递归修改为迭代之后, 还可以将 <code>rest</code> 过程直球塞进 <code>expr</code> , 两个过程合一了.</p>
+<blockquote>
+<p>2.5.5 节 (完整的程序) 略</p>
+</blockquote>
+<h2 id="26">2.6 词法分析<a class="headerlink" href="#26" title="Permanent link">&para;</a></h2>
+<p>翻译器/语法分析的<strong>输入终结符</strong> = <strong>词法分析的输出</strong>.</p>
+<p>词法分析附加了一些信息, 例如行号等. 词法分析要处理空格/ 制表符/ 换行符/ 注释等</p>
+<p>一个词法分析器从输入中读取字符, 并将它们组成 "词法单元对象"</p>
+<p><strong>词法单元对象</strong> 包含:</p>
+<ul>
+<li>用于语法分析的终结符号之外</li>
+<li>一些以属性值的形式出现的附加信息</li>
+</ul>
+<blockquote>
+<p>目前还不需要区分术语 <em>词法单元</em> 和 <em>终结符号</em> , 因为语法分析器忽略了词法单元中带有的属性值.</p>
+<p>本节中, 一个词法单元 = 一个带有附加信息的终结符号.</p>
+<p>构成一个词法单元的输入字符序列称为词素 (lexem). 因此可以说 "词法分析器使得语法分析器不需要考虑词法单元的词素表示方式".</p>
+</blockquote>
+<h3 id="261">2.6.1 剔除空白和注释<a class="headerlink" href="#261" title="Permanent link">&para;</a></h3>
+<p>在遇到空格/ 制表符/ 换行符时不断读取输入字符, 从而跳过对于语法分析的 "空白" 部分.</p>
+<h3 id="262">2.6.2 预读<a class="headerlink" href="#262" title="Permanent link">&para;</a></h3>
+<p>为了解决 <code>&gt;</code> 和 <code>&gt;=</code> 的判定, 因此引入预读; 一般会想到引入缓冲区; 一般再多看一个符号就可以, 不过要注意回退.</p>
+<h3 id="263">2.6.3 常量<a class="headerlink" href="#263" title="Permanent link">&para;</a></h3>
+<p>常量的词法结果可以采用 <code>&lt;num, val&gt;</code> , 其中 <code>val</code> 为其值. (词法单元都用加 <code>&lt;&gt;</code> 的元组给出)</p>
+<h3 id="264">2.6.4 识别关键字和标识符<a class="headerlink" href="#264" title="Permanent link">&para;</a></h3>
+<p><strong>关键字</strong>: 多数语言中将某些固定的字符串作为某些构造的标识或标点符号, 如 for/ do/ if 等.</p>
+<blockquote>
+<p>有些语言, 关键字不是保留字, 可以被程序员当作变量名等使用, 难以区分标识符和关键字, 给词法分析带来问题</p>
+</blockquote>
+<p><strong>标识符</strong>: 词法分析识别的字符串, 可用于变量/ 常量/ 函数等的命名, 用 id 标识</p>
+<p>可以使用 <strong>表</strong> 保存字符串, 并可以进一步采用 Hash 表优化访问速度:</p>
+<ul>
+<li>字符串表将编译器的其它部分和表中字符串的具体表示隔离开<ul>
+<li>编译器的其他部分直接访问符号表, 而不必关心字符串的具体表示, 操作更高效</li>
+</ul>
+</li>
+<li>入表时先查询, 避免同名标识符重复入表<ul>
+<li>这个特点的一个应用是<strong>避免重复声明</strong></li>
+</ul>
+</li>
+<li>保留字容易区分<ul>
+<li>建表之初将关键字入表,</li>
+<li>在读取可以组成标识符的字符串/词素时, 先检查字符串表内是否有这个词素</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>2.6.5 (词法分析器) 略</p>
+</blockquote>
+<h2 id="27">2.7 符号表<a class="headerlink" href="#27" title="Permanent link">&para;</a></h2>
+<p><strong>符号表</strong> (symbol table) : 供编译器用于保存有关源程序构造的各种信息<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> 的数据结构.</p>
+<ul>
+<li>符号表的每个条目中包含与一个标识符相关的信息, 比如它的字符串 (或者词素)/ 它的类型/ 它的存储位置和其他相关信息.</li>
+<li>符号表通常需要支持同一标识符在一个程序中的多重声明</li>
+</ul>
+<p><strong>谁能访问符号表?</strong> 编译器的各个阶段都可能对符号表进行访问/ 操作. 符号表在编译/ 调试等阶段都有用.</p>
+<p><strong>谁来创建符号表条目?</strong> 符号表条目在分析阶段由词法分析器, 语法分析器与语义分析器创建并使用. 本章使语法分析器创建符号表条目, 因为语法分析器对程序的<strong>语法结构</strong>更了解.</p>
+<blockquote>
+<p>思考: 符号表条目和语法结构的关系?</p>
+</blockquote>
+<p>词法分析器当然可以在碰到组成一个词素的字符串时立即建立一个符号表条目, 但是实际上一般它只 <strong>向语法分析器返回一个词法单元</strong>, 比如 <code>id</code> 以及指向这个词素的指针, 语法分析器来决定是否创建一个新条目.</p>
+<blockquote>
+<p>有的语言允许对于一个名字的声明通过多个语句完成, 因此符号表表项的建立可能需要多步.</p>
+</blockquote>
+<h3 id="271">2.7.1 为每个作用域设置一个符号表<a class="headerlink" href="#271" title="Permanent link">&para;</a></h3>
+<p><strong>作用域</strong> (scope) 是指一个或多个声明起作用的程序部分.</p>
+<ul>
+<li>作用域可以嵌套;</li>
+<li>对标识符作用域的解释采用 <strong>最近嵌套</strong> (most-closely) 原则;</li>
+<li>当一个作用域终结时, 对标识符的解释可能发生变化.</li>
+</ul>
+<p>在一些语言中, <strong>程序块</strong> (block) 就是一个作用域.</p>
+<p>为了满足作用域嵌套的情形, 可以用 <strong>符号表栈</strong> 来实现对符号表的管理.</p>
+<ul>
+<li>结构:<ul>
+<li>一个栈存储所有的符号表表项: <code>symbol stack</code></li>
+<li>一个栈存储指向当前局部符号表首地址的指针: <code>block stack</code></li>
+</ul>
+</li>
+<li>操作<ul>
+<li>创建新的符号表: 在 <code>block stack</code> 中压入一个新的项, 指向新符号表的栈底.</li>
+<li>插入一个表项: 在 <code>symbol stack</code> 中压入一个新的项, 且该表项作为对应 Hash 链的链头</li>
+<li>查找一个表项: 按 Hash 表查找对应 Hash 链的第一个同名项</li>
+<li>删除一个符号表: 将 <code>symbol stack</code> 位于该符号表栈底以上的所有项弹出, 并更新 Hash 表</li>
+</ul>
+</li>
+</ul>
+<h3 id="272">2.7.2 符号表的使用<a class="headerlink" href="#272" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>从效果看, 一个符号表的作用是将信息从声明的地方传递到实际使用的地方.</p>
+</blockquote>
+<ul>
+<li>在处理程序的声明部分时, 把相关条目入表;</li>
+<li>在处理程序的语句部分时, 通过查找符号表, 得到必要的信息.</li>
+</ul>
+<h2 id="28">2.8 生成中间代码<a class="headerlink" href="#28" title="Permanent link">&para;</a></h2>
+<h3 id="281">2.8.1 两种中间表示形式<a class="headerlink" href="#281" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>中间代码生成是编译<strong>前端</strong>的重要工作之一.</p>
+</blockquote>
+<p>两种最重要的中间表示形式:</p>
+<ul>
+<li><strong>树形结构</strong>: 在 程序分析 / 优化(主要指机器无关优化) 中, AST 超有用<ul>
+<li>语法分析树</li>
+<li>※(抽象) 语法树(AST)</li>
+</ul>
+</li>
+<li><strong>线性表示形式</strong><ul>
+<li>三地址代码: 多见于编译器后端</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>静态检查也是<strong>前端</strong>的重要工作之一</p>
+<ul>
+<li>在编译时刻完成, 检查输入是否符合源语言的语法和语义约定</li>
+<li>能够发现一些错误, 如类型不匹配/ 语法格式/ 语法约束条件</li>
+<li>静态检查非常有用, 但在很多场景中, 单纯的静态检查是不能满足需求</li>
+</ul>
+</blockquote>
+<h3 id="282">2.8.2 语法树的构造<a class="headerlink" href="#282" title="Permanent link">&para;</a></h3>
+<p>语法树的结点对应类 <code>Node</code>, 它有两个直接子类: <code>Expr</code> (表达式) 和 <code>Stmt</code> (语句).</p>
+<p>这两个子类的区别可以通过一个 <code>while</code> 语句的实例体会一下:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">while</span> <span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="n">stmt</span>
+</code></pre></div>
+</td></tr></table>
+<p>下面介绍 <strong>语句</strong> (statement), <strong>语句块</strong> (block) 和 <strong>表达式</strong> (expression) 在抽象语法树中的对应构造.</p>
+<h4 id="statement">语句 (statement) 的抽象语法树<a class="headerlink" href="#statement" title="Permanent link">&para;</a></h4>
+<p>在抽象语法中, 为每种<strong>语句构造</strong>定义相应的<strong>运算符</strong>:</p>
+<ul>
+<li>比如以关键字开头的构造, 可以考虑使用这个关键字作为对应运算符,</li>
+<li>比如不以关键字开头的构造, 考虑定义新运算符 <code>eval</code> 和类 <code>Eval</code>, <code>Eval</code> 是 <code>Stmt</code> 的子类;</li>
+</ul>
+<p>每个<strong>语句运算符</strong>都有一个对应的同名<strong>类</strong> (Captitalized), 并定义一个类 <code>Seq</code>, 表示语句序列, 对应于文法中的非终结符号 <span class="arithmatex">\(stmts\)</span>. 这些类都是 <code>Stmt</code> 的子类, <code>Stmt</code> 又是 <code>Node</code> 的子类. 对应地, 每个<strong>类</strong>的对象实例中, <strong>属性 <span class="arithmatex">\(n\)</span></strong> 标识了该对象表示的语言结构对应的抽象语法树的<strong>结点</strong>.</p>
+<h4 id="block">在抽象语法树中表示语句块 (block)<a class="headerlink" href="#block" title="Permanent link">&para;</a></h4>
+<p><img :=":" alt="rules-for-representing-blocks-in-ast" src="chap_02.assets/rules-for-representing-blocks-in-ast.png" style="height:50px" /></p>
+<p>上面的规则中:</p>
+<ul>
+<li>第 1 条: 若一个语句是语句块, 则它的语法树等于这个块的语法树</li>
+<li>第 2 条: 一个非终结符号 <span class="arithmatex">\(block\)</span> 对应的抽象语法树就是该块中的语句序列对应的语法树.</li>
+</ul>
+<h4 id="expression">表达式 (expression) 的语法树<a class="headerlink" href="#expression" title="Permanent link">&para;</a></h4>
+<p>进一步扩充表达式文法, 增加比较运算符, 增加一个新的非终结符 <span class="arithmatex">\(add\)</span></p>
+<!-- 在 [2.2.6 节](#226) 中提到过, 非终结符号的数目正好比表达式中优先级的层数多一. 这在 -->
+
+<ol>
+<li><strong>抽象语法</strong> 允许我们将 "类似的" 算符归为一组, 以减少实现时不同的子类;</li>
+<li>在实际实现时, 可以在算符对应的树结点增加域 (或属性) 来表示具体的算符是什么;<ul>
+<li>算符的种类决定结点的类型 , 如 Op/ Cond/ Assign 等</li>
+<li>增加算符标识, 如把 <code>*</code> 作为结点上增加的属性, 以决定结点的翻译等</li>
+</ul>
+</li>
+</ol>
+<h3 id="283">2.8.3 静态检查<a class="headerlink" href="#283" title="Permanent link">&para;</a></h3>
+<p><strong>静态检查</strong>: 在编译阶段完成的各种一致性检查, 排除错误.</p>
+<p><strong>语法检查</strong>: 目前编译器能够发现的错误, 多数是在语法分析阶段发现的.</p>
+<ul>
+<li>有些错误是不符合语法的格式要求, 如括号不配对/ 该出现运算对象的地方出现了运算符等, 多数通过<strong>语法分析过程中的匹配 (<code>match</code>) 或归约过程</strong>发现错误</li>
+<li>有些错误是不符合语法规则的约束条件 (这些可能是难以形式化描述, 通常作为语法规则的约束条件出现, 如 <code>break</code> 必须在循环等结构中/ 变量的先声明后使用等) , 这些是<strong>伴随语法分析过程, 作为语义动作实现</strong></li>
+</ul>
+<p><strong>类型检查</strong>: 检查运算符与运算对象的类型是否匹配, 不匹配要报错.</p>
+<ul>
+<li>如果语言要求进行自动的类型转换, 则编译器在检测到类型不匹配时, 要进行插入自动的类型转换, 如果没有合适的规则插入, 再报错</li>
+</ul>
+<h4 id="_12">左值和右值<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>左值</th>
+<th>右值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>含义</td>
+<td>存储位置</td>
+<td>存放的值</td>
+</tr>
+<tr>
+<td>range</td>
+<td>表达式/标识符</td>
+<td>表达式/标识符/常量</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>赋值号两侧都可以是表达式, 但是赋值号左侧的表达式最终应该得到一个左值, 而对于右侧的表达式, 采用的则是其右值</p>
+</blockquote>
+<p>静态检查要保证左值和右值出现在恰当的位置.</p>
+<h4 id="_13">类型检查<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h4>
+<p><strong>类型检查</strong>: 确保一个构造的类型符合上下文的期望.</p>
+<p>类型检查规则按照抽象语法中运算符/ 运算分量的结构进行描述.</p>
+<p>考虑特殊情形:</p>
+<ul>
+<li><strong>自动类型转换</strong>: 需要对可以经过自动转换变匹配的情形返回正确<ul>
+<li>如: 一些程序允许整数和浮点数的直接比较</li>
+</ul>
+</li>
+<li><strong>重载</strong>: 如果一个符号在不同上下文中有不同的含义, 那么我们说这个符号是重载 (over-loading) 的<ul>
+<li>如: <code>java</code> 中的 <code>+</code> 在应用于整数运算分量时表示相加, 但在应用于字符串型运算分量时表示 concat, 此时需要根据已知的运算分量类型和结果类型来判断一个重载的运算符的含义.</li>
+</ul>
+</li>
+</ul>
+<h3 id="284">2.8.4 三地址码<a class="headerlink" href="#284" title="Permanent link">&para;</a></h3>
+<h4 id="_14">三地址指令<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h4>
+<p>三地址指令格式形如 <code>x = y op z</code>; <code>op</code> 是运算符, <code>x, y, z</code> 可以是变量/常量/临时量等.</p>
+<ol>
+<li>(顺序) 如果没有显式的转移指令, 三地址代码将顺序执行</li>
+<li>(数组+) 有些操作要分解成多个三地址指令完成, 如数组将由下面的两条指令处理 (数组元素访问占用两个地址):<ul>
+<li><code>x[y] = z</code> : 将 <code>z</code> 的值保存到 <code>x[y]</code> 的位置上</li>
+<li><code>x = y[z]</code> : 将 <code>x[y]</code> 的值保存到 <code>z</code> 的位置上</li>
+</ul>
+</li>
+<li>(转移) 转移指令如下:<ul>
+<li><code>ifFalse x goto L</code> : <code>x</code> 为假, 跳转到标号为 <code>L</code> 的指令</li>
+<li><code>ifTrue x goto L</code> : <code>x</code> 为真, 跳转到标号为 <code>L</code> 的指令</li>
+<li><code>goto L</code> : 无条件跳转到标号为 <code>L</code> 的指令</li>
+</ul>
+</li>
+<li>(拷贝) 复写指令: <code>x = y</code> 将 <code>y</code> 的值拷贝至 <code>x</code> 中</li>
+</ol>
+<h4 id="_15">语句的翻译<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h4>
+<p>利用几种三地址代码, 就可以实现语句中控制流的变化, 比如使用转移三地址指令来翻译 <code>if-else</code> 控制流. (应该属于常识级别的东西吧...?)</p>
+<p>对于一个 <code>if</code> 语句, <code>If</code> 构造函数扩建了语法树的结点, 并为相关属性赋值, 申请了新的编号; <code>gen</code> 函数生成三地址代码, 它调用了 <code>expr</code> 和 <code>stmt</code> 等过程, 完成了相关翻译.</p>
+<p>例子:</p>
+<p><img :=":" alt="function-gen-in-class-if" src="chap_02.assets/function-gen-in-class-if.png" style="height:180px" /></p>
+<h4 id="_16">表达式的翻译<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h4>
+<blockquote>
+<p>考虑包含二目运算符 <code>op</code>, 数组访问和赋值运算, 并包含常量及标识符的表达式</p>
+</blockquote>
+<ol>
+<li>简便起见, 为一个表达式的语法树中的 <strong>每个运算符结点</strong> 都生成一个三地址指令<ul>
+<li>注意! 不需要为 <em>标识符</em> 和 <em>常量</em> 生成任何代码, 因为它们可以作为 <strong>地址</strong> 出现在指令中</li>
+</ul>
+</li>
+<li>翻译过程中可能引入临时变量<ul>
+<li>如 <code>i-j+k</code> 的处理</li>
+</ul>
+</li>
+<li>数组访问/ 赋值运算: 区分左值和右值<ul>
+<li>右值: 计算出右值, 暂存在临时量中, 从而得到翻译结果<ul>
+<li>例如翻译 <code>2*a[i]</code> , 可以得到 <code>t1=a[i], t2=2*t1</code> 这样的结果</li>
+</ul>
+</li>
+<li>左值: not simple</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>解决数组访问/赋值运算的 "统一"的 &amp; "简单"的 方法是使用函数 <code>lvalue</code> 和 <code>rvalue</code>. 来讲讲 <code>lvalue</code> 和 <code>rvalue</code>... 太糟心了.</p>
+</blockquote>
+<h5 id="lvalue"><code>lvalue</code> 函数<a class="headerlink" href="#lvalue" title="Permanent link">&para;</a></h5>
+<p>左值访问的情况:</p>
+<ul>
+<li>标识符 (简单情形)</li>
+<li>数组访问 (new 一个 Access 结点)</li>
+</ul>
+<p>伪代码:</p>
+<p><img :=":" alt="pseudocode-for-function-lvalue" src="chap_02.assets/pseudocode-for-function-lvalue.png" style="height:180px" /></p>
+<p><strong>例程</strong>: 结点 <code>x</code> 表示数组访问 <code>a[2*k]</code> 时, <code>lvalue(x)</code> 生成:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">t</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">k</span>
+</code></pre></div>
+</td></tr></table>
+<p>并且</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="k">new</span> <span class="n">Access</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">rvalue</span><span class="p">(</span><span class="n">z</span><span class="p">));</span>
+</code></pre></div>
+</td></tr></table>
+<h5 id="rvalue"><code>rvalue</code> 函数<a class="headerlink" href="#rvalue" title="Permanent link">&para;</a></h5>
+<p>右值访问的情况:</p>
+<table>
+<thead>
+<tr>
+<th>结点 <code>x</code></th>
+<th>计算</th>
+<th><strong>返回</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>y op z</code></td>
+<td><code>rvalue</code> 递归计算 <code>y,z</code> 的右值 <code>y', z'</code> , 产生指令 <code>t = y' op z'</code></td>
+<td>返回结点 <code>t</code></td>
+</tr>
+<tr>
+<td><code>y[z]</code></td>
+<td>复用 <code>lvalue</code> 函数, 返回数组访问 <code>y[z']</code> , 生成指令 <code>t = y[z']</code></td>
+<td>返回结点 <code>t</code></td>
+</tr>
+<tr>
+<td><code>y = z</code></td>
+<td>计算 <code>z'=rvalue(z)</code> , 生成计算 <code>lvalue(y) = z'</code> 的指令</td>
+<td>返回结点 <code>z'</code></td>
+</tr>
+</tbody>
+</table>
+<p>伪代码:</p>
+<p><img :=":" alt="pseudocode-for-function-rvalue" src="chap_02.assets/pseudocode-for-function-rvalue.png" style="height:350px" /></p>
+<p><strong>例程</strong>: 将 <code>rvalue</code> 应用于 <code>a[i] = 2 * a[j-k]</code> 语法树时, 它将生成:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">t3</span> <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="n">k</span>
+<span class="n">t2</span> <span class="o">=</span> <span class="n">a</span><span class="o">[</span><span class="n">t3</span><span class="o">]</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t2</span>
+<span class="n">a</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">t1</span>
+</code></pre></div>
+</td></tr></table>
+<h4 id="_17">改进表达式的代码<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h4>
+<h5 id="a">(a) 在优化阶段,减少拷贝指令的数目<a class="headerlink" href="#a" title="Permanent link">&para;</a></h5>
+<p><strong>例 1</strong>: 根据指令序列中标识符的使用情况进行优化</p>
+<p>对于</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">t</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">i</span> <span class="o">=</span> <span class="n">t</span>
+</code></pre></div>
+</td></tr></table>
+<p>如果 <code>t</code> 没有其他的使用点, 则可以优化为</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+</code></pre></div>
+</td></tr></table>
+<p><strong>例 2</strong>: 通过某种回填技术减少拷贝指令</p>
+<p>对于</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">j</span> <span class="o">+</span> <span class="n">k</span>
+</code></pre></div>
+</td></tr></table>
+<p>暂时生成</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="kc">null</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">k</span>
+</code></pre></div>
+</td></tr></table>
+<p>如果其后发现 <code>j + k</code> 是一个赋值语句的右部, 且左部是一个标量 (可以简单理解为是非数组访问), 例如 <code>i</code> , 则直接生成</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">i</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">k</span>
+</code></pre></div>
+</td></tr></table>
+<h4 id="b">(b) 充分考虑上下文, 在最初生成指令时就减少生成的指令<a class="headerlink" href="#b" title="Permanent link">&para;</a></h4>
+<p>例如, 如果三地址赋值语句左部:</p>
+<ul>
+<li>是一个数组元素, 则右部只能是一个<strong>单地址</strong>的量;</li>
+<li>是一个名字 <code>x</code>, 那么其右部可以是一个使用两个地址的运算 <code>y op z</code>.</li>
+</ul>
+<h2 id="29-2">2.9 第 2 章总结<a class="headerlink" href="#29-2" title="Permanent link">&para;</a></h2>
+<p>本章介绍的语法制导翻译技术可以用于构造下图中简易编译器的前端.</p>
+<p><img :=":" alt="fig-2-46" src="chap_02.assets/fig-2-46.png" style="height:400px" /></p>
+<p>构造一个语法制导翻译器要从源语言的文法开始. 一个<strong>文法</strong>描述了程序的层次结构. 文法的定义使用了称为<strong>终结符号</strong>的基本符号和称为<strong>非终结符号</strong>的变量符号. 这些符号代表了语言的构造. 一个文法的规则, 即<strong>产生式</strong>, 由一个作为<strong>产生式头</strong>或<strong>产生式左部</strong>的非终结符, 以及称为<strong>产生式体</strong>或<strong>产生式右部</strong>的终结符号/非终结符号序列组成. 文法中有一个非终结符被指派为<strong>开始</strong>符号.</p>
+<p>在描述一个翻译器时, 在程序构造中附加 "属性" 是非常有用的. <strong>属性</strong>是指与一个程序构造关联的任何量值. 因为程序构造是使用文法符号来表示的, 因此属性的概念也被扩展到文法符号上. 属性的例子包括与一个表示数字的终结符号 <span class="arithmatex">\(num\)</span> 相关联的整数值, 或与一个表示标识符的终结符号 <span class="arithmatex">\(id\)</span> 相关联的字符串.</p>
+<p>词法分析器从输入中逐个读取字符, 并输出一个<strong>词法单元</strong>的流, 其中词法单元由一个终结符号以及以属性值形式出现的附加信息组成. 在上面的图 2-46 中, 词法单元被写成用 <code>&lt;&gt;</code> 括起的元组. 词法单元 <code>&lt;id, "peek"&gt;</code> 分由终结符号 <span class="arithmatex">\(id\)</span> 和一个指向包含字符串 <code>"peek"</code> 的符号表条目的指针构成. 翻译器使用符号表来存放保留字和已经遇到的标识符.</p>
+<p><strong>语法分析</strong>要解决的问题是指出如何从一个文法的开始符号推导出一个给定的终结符号串. 推导的方法是反复将某个非终结符替换为它的某个产生式的体. 从概念上讲, 语法分析器会创建一棵语法分析树. 该树的根结点的标号为文法的开始符号, 每个非叶子结点对应于一个产生式, 每个叶子结点的标号为一个终结符号或空串 <span class="arithmatex">\(\epsilon\)</span>. 语法分析树推导出由它的叶子结点从左到右组成的终结符号串.</p>
+<p>使用被称为预测语法分析法的自顶向下 (从语法分析树的根结点到叶子结点) 方法可以手工建立高效的语法分析器. <strong>预测分析器</strong>有对应于每个非终结符的子过程. 该过程的过程体模拟了这个非终结符号的各个产生式. 只要在输入流中<strong>向前看</strong>一个符号, 就可以无二义地确定该过程体中的控制流. 其他语法分析方法见第 4 章.</p>
+<p>语法制导翻译通过在文法中添加规则或程序片段来完成. 在本章中, 我们只考虑了<strong>综合</strong>属性. 任意结点无上的一个综合属性的值只取决于元的子结点 (如果有的话) 上的属性值. <strong>语法制导定义</strong>将规则和产生式相关联, 这些规则用于计算属性值. 语法制导的<strong>翻译方案</strong>在产生式体中嵌入了称为<strong>语义动作</strong>的程序片段. 这些语义动作按照语法分析中产生式的使用顺序执行.</p>
+<p>语法分析的结果是源代码的一种中间表示形式, 称为<strong>中间代码</strong>. 图 2-46 列出了中间代码的两种主要形式. <strong>抽象语法树</strong>中的各个结点代表了程序构造, 一个结点的子结点给出了该构造有意义的子构造. 另一种表示方法是<strong>三地址代码</strong>, 它是一个由三地址指令组成的序列, 其中每个指令只执行一个运算.</p>
+<p><strong>符号表</strong>是存放有关标识符的信息的数据结构. 当分析一个标识符的声明的时候, 该标识符的信息被放入符号表中. 当在后来使用这个标识符时, 比如它作为一个表达式的因子使用时, 语义动作将从符号表中获取这些信息.</p>
+<h2 id="_18">参考资料<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="https://github.com/CacaoGatto/ucas-compiler-20sp-notes/blob/main/chapter2.md">ucas-compiler-20sp-notes/chapter2.md at main · CacaoGatto/ucas-compiler-20sp-notes</a></li>
+</ol>
+<!-- Footnotes -->
+
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>这些信息在编译器的分析阶段被逐步收集并放入符号表, 它们在综合阶段用于生成目标代码.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" data-md-state="hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="chap_01.html" class="md-footer__link md-footer__link--prev" aria-label="上一页: C1 编译概论" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              C1 编译概论
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="chap_03.html" class="md-footer__link md-footer__link--next" aria-label="下一页: C3 词法分析" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              C3 词法分析
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": ["search.suggest", "search.highlight", "navigation.top"], "translations": {"clipboard.copy": "\u590d\u5236", "clipboard.copied": "\u5df2\u590d\u5236", "search.config.lang": "ja", "search.config.pipeline": "trimmer, stemmer", "search.config.separator": "[\\uff0c\\u3002]+", "search.placeholder": "\u641c\u7d22", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.477d984a.min.js", "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.ddd52ceb.min.js"></script>
+      
+        <script src="javascripts/config.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

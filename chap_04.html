@@ -1,0 +1,1260 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.1, mkdocs-material-7.1.10">
+    
+    
+      
+        <title>C4 语法分析 - Notes for Compiler Principles</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.1fe995fd.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.f1a3b89f.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#009485">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <script>function __prefix(e){return new URL(".",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#c4" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="Notes for Compiler Principles" class="md-header__button md-logo" aria-label="Notes for Compiler Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Notes for Compiler Principles
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              C4 语法分析
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/chuan-325/comp-21sp/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chuan-325/comp-21sp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="Notes for Compiler Principles" class="md-nav__button md-logo" aria-label="Notes for Compiler Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    Notes for Compiler Principles
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/chuan-325/comp-21sp/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chuan-325/comp-21sp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      <label class="md-nav__link" for="__nav_2">
+        Note
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Note" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Note
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_01.html" class="md-nav__link">
+        C1 编译概论
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_02.html" class="md-nav__link">
+        C2 一个简单的语法制导翻译器
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_03.html" class="md-nav__link">
+        C3 词法分析
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          C4 语法分析
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="chap_04.html" class="md-nav__link md-nav__link--active">
+        C4 语法分析
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#41" class="md-nav__link">
+    4.1 引论
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 引论">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#411" class="md-nav__link">
+    4.1.1 语法分析器的作用
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#413" class="md-nav__link">
+    4.1.3 语法错误的处理
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#414" class="md-nav__link">
+    4.1.4 错误恢复策略
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#42" class="md-nav__link">
+    4.2 上下文无关文法的分析及改造
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#43" class="md-nav__link">
+    4.3 设计文法
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#44" class="md-nav__link">
+    4.4 自顶向下的分析
+  </a>
+  
+    <nav class="md-nav" aria-label="4.4 自顶向下的分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#441-recursive-down" class="md-nav__link">
+    4.4.1 递归下降 (Recursive Down) 的语法分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#442-firstfollow" class="md-nav__link">
+    4.4.2 FIRST/FOLLOW 集: 确定的递归下降分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#443-ll1" class="md-nav__link">
+    4.4.3 LL(1) 文法
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#444" class="md-nav__link">
+    4.4.4 非递归的预测分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#445" class="md-nav__link">
+    4.4.5 预测分析中的错误恢复
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#45" class="md-nav__link">
+    4.5 自底向上的分析
+  </a>
+  
+    <nav class="md-nav" aria-label="4.5 自底向上的分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#451" class="md-nav__link">
+    4.5.1 归约
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#46-lr-lr" class="md-nav__link">
+    4.6 LR 语法分析技术介绍: 简单 LR 技术
+  </a>
+  
+    <nav class="md-nav" aria-label="4.6 LR 语法分析技术介绍: 简单 LR 技术">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#461-lr" class="md-nav__link">
+    4.6.1 为什么使用 LR 语法分析器
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#462-lr0" class="md-nav__link">
+    4.6.2 项和 LR(0) 自动机
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#463-lr" class="md-nav__link">
+    4.6.3 LR 语法分析算法
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#464-slr" class="md-nav__link">
+    4.6.4 构造 SLR 语法分析表
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#465" class="md-nav__link">
+    4.6.5 可行前缀
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    参考资料
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_05.html" class="md-nav__link">
+        C5 语法制导的翻译
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_08.html" class="md-nav__link">
+        C8 代码生成和优化
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      <label class="md-nav__link" for="__nav_3">
+        Homework
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Homework" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Homework
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_01.html" class="md-nav__link">
+        hw-01-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_02_01.html" class="md-nav__link">
+        hw-02-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_02_02.html" class="md-nav__link">
+        hw-02-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_03_01.html" class="md-nav__link">
+        hw-03-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_03_02.html" class="md-nav__link">
+        hw-03-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_01.html" class="md-nav__link">
+        hw-04-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_02.html" class="md-nav__link">
+        hw-04-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_03.html" class="md-nav__link">
+        hw-04-03
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#41" class="md-nav__link">
+    4.1 引论
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 引论">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#411" class="md-nav__link">
+    4.1.1 语法分析器的作用
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#413" class="md-nav__link">
+    4.1.3 语法错误的处理
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#414" class="md-nav__link">
+    4.1.4 错误恢复策略
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#42" class="md-nav__link">
+    4.2 上下文无关文法的分析及改造
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#43" class="md-nav__link">
+    4.3 设计文法
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#44" class="md-nav__link">
+    4.4 自顶向下的分析
+  </a>
+  
+    <nav class="md-nav" aria-label="4.4 自顶向下的分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#441-recursive-down" class="md-nav__link">
+    4.4.1 递归下降 (Recursive Down) 的语法分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#442-firstfollow" class="md-nav__link">
+    4.4.2 FIRST/FOLLOW 集: 确定的递归下降分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#443-ll1" class="md-nav__link">
+    4.4.3 LL(1) 文法
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#444" class="md-nav__link">
+    4.4.4 非递归的预测分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#445" class="md-nav__link">
+    4.4.5 预测分析中的错误恢复
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#45" class="md-nav__link">
+    4.5 自底向上的分析
+  </a>
+  
+    <nav class="md-nav" aria-label="4.5 自底向上的分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#451" class="md-nav__link">
+    4.5.1 归约
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#46-lr-lr" class="md-nav__link">
+    4.6 LR 语法分析技术介绍: 简单 LR 技术
+  </a>
+  
+    <nav class="md-nav" aria-label="4.6 LR 语法分析技术介绍: 简单 LR 技术">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#461-lr" class="md-nav__link">
+    4.6.1 为什么使用 LR 语法分析器
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#462-lr0" class="md-nav__link">
+    4.6.2 项和 LR(0) 自动机
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#463-lr" class="md-nav__link">
+    4.6.3 LR 语法分析算法
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#464-slr" class="md-nav__link">
+    4.6.4 构造 SLR 语法分析表
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#465" class="md-nav__link">
+    4.6.5 可行前缀
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    参考资料
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/chuan-325/comp-21sp/edit/master/docs/chap_04.md" title="编辑此页" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="c4">C4 语法分析<a class="headerlink" href="#c4" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>提示: 本页面未施工完成, 请谨慎辨别.</p>
+</blockquote>
+<h2 id="41">4.1 引论<a class="headerlink" href="#41" title="Permanent link">&para;</a></h2>
+<h3 id="411">4.1.1 语法分析器的作用<a class="headerlink" href="#411" title="Permanent link">&para;</a></h3>
+<h3 id="413">4.1.3 语法错误的处理<a class="headerlink" href="#413" title="Permanent link">&para;</a></h3>
+<h3 id="414">4.1.4 错误恢复策略<a class="headerlink" href="#414" title="Permanent link">&para;</a></h3>
+<h4 id="_1">恐慌模式的恢复<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h4>
+<h4 id="_2">短语层次的恢复<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h4>
+<h4 id="_3">错误产生式 (出错产生式)<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<ol>
+<li>根据经常出现的错误, 构造产生错误结构的产生式 (需要对错误的相对了解);</li>
+<li>产生式的被匹配意味着错误的出现, 从而可以据此给出适当的错误信息</li>
+</ol>
+<h4 id="_4">全局纠正<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
+<h2 id="42">4.2 上下文无关文法的分析及改造<a class="headerlink" href="#42" title="Permanent link">&para;</a></h2>
+<p>自下而上的处理能力一般高于自上而下;
+但两者一般而言都不能保证二义性文法的处理 (不是一定不能, 是不一定能);
+对编译大致够用?
+对自然语言不一定够用.</p>
+<h2 id="43">4.3 设计文法<a class="headerlink" href="#43" title="Permanent link">&para;</a></h2>
+<h2 id="44">4.4 自顶向下的分析<a class="headerlink" href="#44" title="Permanent link">&para;</a></h2>
+<h3 id="441-recursive-down">4.4.1 递归下降 (Recursive Down) 的语法分析<a class="headerlink" href="#441-recursive-down" title="Permanent link">&para;</a></h3>
+<p>不写出回溯的算法伪代码:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="kt">void</span> <span class="nf">A</span><span class="p">(){</span>
+    <span class="n">Choose</span> <span class="n">an</span> <span class="n">A</span><span class="o">-</span><span class="n">production</span><span class="p">(</span><span class="n">A</span><span class="o">=&gt;</span><span class="n">X_1X_2</span><span class="p">...</span><span class="n">X_k</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">k</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">X_i</span> <span class="n">is</span> <span class="n">nonoterminal</span><span class="p">)</span> <span class="n">call</span> <span class="n">procedure</span> <span class="n">X_i</span><span class="p">();</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">X_i</span> <span class="o">==</span> <span class="n">current</span> <span class="n">input</span> <span class="n">symbol</span><span class="p">)</span> <span class="n">advance</span> <span class="n">the</span> <span class="n">input</span> <span class="n">to</span> <span class="n">next</span> <span class="n">symbol</span><span class="p">;</span>
+        <span class="k">else</span> <span class="cm">/*error - or go backward*/</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</td></tr></table>
+<p>一般的自顶向下分析存在的问题:</p>
+<ol>
+<li>若文法存在左递归 (<span class="arithmatex">\(A\overset{+}\Rightarrow A\alpha\)</span>), 则将无限循环;</li>
+<li>当非终结符用某个选择匹配成功时, 可能后面还是不匹配, 是虚假的成功, 故需要回溯技术</li>
+<li>回溯=有重复工作, 建议消除回溯;</li>
+<li>最终报告 "分析不成功" 时, 难以定位出错的确切位置;</li>
+<li>带回溯的自顶向下分析是一种穷举搜索, 代价极高.</li>
+</ol>
+<h3 id="442-firstfollow">4.4.2 FIRST/FOLLOW 集: 确定的递归下降分析<a class="headerlink" href="#442-firstfollow" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Q: 如何消除回溯?</li>
+<li>A: 匹配输入串时, 算法能根据面临的输入符号准确地指派一个产生式选择, 且工作结果是确信无疑的.</li>
+<li>Q': 什么叫 "准确地指派"?</li>
+<li>A': 见下.</li>
+</ul>
+<h5 id="firstfollow">FIRST/FOLLOW 集的定义<a class="headerlink" href="#firstfollow" title="Permanent link">&para;</a></h5>
+<p>引入 FIRST 集和 FOLLOW 集.</p>
+<p><strong>FIRST 集</strong>: 文法 <span class="arithmatex">\(G\)</span> 是不含左递归的文法,
+对于 <span class="arithmatex">\(G\)</span> 的<strong>任意文法符号串</strong> <span class="arithmatex">\(\alpha\)</span> ,
+FIRST 集是它的开始符号集合 (<strong>终结首符集合</strong>):</p>
+<div class="arithmatex">\[
+FIRST(\alpha):=\{a|\alpha\overset{*}\Rightarrow a\dots, a\in V_T\}
+\]</div>
+<blockquote>
+<p>如果 <span class="arithmatex">\(\alpha\)</span> 可以推导出 <span class="arithmatex">\(\epsilon\)</span>, 则 <span class="arithmatex">\(\epsilon\in FIRST(\alpha)\)</span>.</p>
+</blockquote>
+<p>回答 "准确地指派":
+如果非终结符 <span class="arithmatex">\(A\)</span> 的任意两个选择的开始符号集满足 <span class="arithmatex">\(FIRST(a_i)\cap FIRST(a_j)=\emptyset\)</span>,
+且空串不是关于 <span class="arithmatex">\(A\)</span> 的所有开始符号集的元素,
+则 <span class="arithmatex">\(A\)</span> 就可以根据所面临的第一个输入符号,
+准确地指派一个选择去执行任务.</p>
+<p><strong>FOLLOW 集</strong>: 对于文法 <span class="arithmatex">\(G\)</span> 的任意非终结符 <span class="arithmatex">\(A\)</span> , FOLLOW 集是它的<strong>后继符号集合</strong> (紧接在 <span class="arithmatex">\(A\)</span> 之后的终结符号/<span class="arithmatex">\(\$\)</span>符号):</p>
+<div class="arithmatex">\[
+FOLLOW(A)=\{a|S\overset{+}\Rightarrow\dots Aa\dots, a\in V_T\}
+\]</div>
+<blockquote>
+<p>如果 <span class="arithmatex">\(A\)</span> 可以是某个句型的最右符号,
+则表示输入结束的符号 <span class="arithmatex">\(\$\in FOLLOW(A)\)</span>.</p>
+</blockquote>
+<p>对于语法树中的某个非终结符号结点,
+FIRST 集中的终结符号会出现在结点子树的最左叶子结点,
+FOLLOW 集中的终结符号会出现在结点右侧的最左叶子结点.</p>
+<h5 id="firstfollow_1">FIRST/FOLLOW 集的计算<a class="headerlink" href="#firstfollow_1" title="Permanent link">&para;</a></h5>
+<!-- ! -->
+
+<p>计算 <span class="arithmatex">\(FIRST(X)\)</span>:
+(应用以下规则, 直至没有新的终结符号 or <span class="arithmatex">\(\epsilon\)</span> 可加入)</p>
+<ol>
+<li>如果 <span class="arithmatex">\(X\)</span> 是一个终结符号,
+   则 <span class="arithmatex">\(FIRST(X)=X\)</span>;</li>
+<li>如果 <span class="arithmatex">\(X\)</span> 是一个非终结符号,<ul>
+<li>若有产生式 <span class="arithmatex">\(X\rightarrow Y_1Y_2\cdots Y_k\)</span>, <span class="arithmatex">\(k\geq1\)</span>,
+   则对所有满足 <span class="arithmatex">\(Y_1\cdots Y_{i-1}\overset{*}\Rightarrow\epsilon\)</span> 的 <span class="arithmatex">\(i\)</span>,
+   将 <span class="arithmatex">\(FIRST(Y_i)\)</span> 中的所有非 <span class="arithmatex">\(\epsilon\)</span> 符号加入 <span class="arithmatex">\(FIRST(X)\)</span>;</li>
+<li>若对于所有的 <span class="arithmatex">\(j=1,2,\cdots, k\)</span>, 都有 <span class="arithmatex">\(\epsilon\in FISRT(Y_j)\)</span>, 则将 <span class="arithmatex">\(\epsilon\)</span> 加入 <span class="arithmatex">\(FIRST(X)\)</span>;</li>
+</ul>
+</li>
+<li>如果 <span class="arithmatex">\(X\rightarrow\epsilon\)</span> 是一个产生式, 则将 <span class="arithmatex">\(\epsilon\)</span> 加入 <span class="arithmatex">\(FIRST(X)\)</span>.</li>
+</ol>
+<p>计算所有非终结符号的 <span class="arithmatex">\(FOLLOW\)</span> 集:
+(应用以下规则, 直至没有新的终结符号 or <span class="arithmatex">\(\epsilon\)</span> 可加入)</p>
+<ol>
+<li>将 <span class="arithmatex">\(\$\)</span> 放入 <span class="arithmatex">\(FOLLOW(S)\)</span> 中,
+   其中 <span class="arithmatex">\(S\)</span> 是开始符号, <span class="arithmatex">\(\$\)</span> 是输入右端的结束标记;</li>
+<li>如果存在产生式 <span class="arithmatex">\(A\rightarrow \alpha B\beta\)</span>,
+   则将 <span class="arithmatex">\(FIRST(\beta)\)</span> 中<strong>所有的非 <span class="arithmatex">\(\epsilon\)</span> 符号</strong>加入 <span class="arithmatex">\(FOLLOW(B)\)</span>;</li>
+<li>如果存在一个产生式 <span class="arithmatex">\(A\rightarrow\alpha B\)</span>
+   或 存在产生式 <span class="arithmatex">\(A\rightarrow \alpha B \beta\)</span> 且 <span class="arithmatex">\(\epsilon\in FIRST(\beta)\)</span>,
+   则将 <span class="arithmatex">\(FOLLOW(A)\)</span> 中的<strong>所有符号</strong>加入 <span class="arithmatex">\(FOLLOW(B)\)</span>.</li>
+</ol>
+<!--! 预测分析器 -->
+
+<h3 id="443-ll1">4.4.3 LL(1) 文法<a class="headerlink" href="#443-ll1" title="Permanent link">&para;</a></h3>
+<p><strong>LL(1) 文法</strong>:
+一个文法如果是 LL(1) 的,
+当且仅当 <span class="arithmatex">\(G\)</span> 的任何两个产生式
+<span class="arithmatex">\(A\rightarrow\alpha|\beta\)</span>
+满足:</p>
+<ol>
+<li><span class="arithmatex">\(FIRST(\alpha)\cap FIRST(\beta)=\emptyset\)</span>,</li>
+<li>若 <span class="arithmatex">\(\beta\overset{*}\Rightarrow\epsilon\)</span>,
+   则 <span class="arithmatex">\(FIRST(\alpha)\cap FOLLOW(A)=\emptyset\)</span>,
+   反之同.</li>
+</ol>
+<p>LL(1) 文法可描述大部分程序设计语言构造,
+无需回溯.</p>
+<!-- 算法 4.33 构造预测分析表 -->
+
+<ul>
+<li>输入: 文法 <code>G</code></li>
+<li>输出: 预测分析表 <code>M</code></li>
+</ul>
+<p><strong>方法</strong>:
+对于文法 <code>G</code> 的每一个产生式 <code>A-&gt;α</code> , 作如下处理:</p>
+<ol>
+<li>对于 <code>FIRST(α)</code> 中的每个终结符号 <code>a</code> ,
+   将 <code>A-&gt;α</code> 加入到 <code>M[A,a]</code> 中;</li>
+<li>如果 <code>ε</code> 在 <code>FIRST(α)</code> 中,
+   那么对于 <code>FOLLOW(A)</code> 中的每个终结符号 <code>b</code> (也可以是 <code>$</code>),
+   将 <code>A-&gt;α</code> 加入到 <code>M[A,b]</code> (相应可能是 <code>M[A,$]</code>) 中.</li>
+</ol>
+<p>完成如上操作后,
+仍然空白的表项即为 "error" 表项.</p>
+<!-- !是否LL(1)<=>分析表的条目有无重复-->
+
+<p>如何判断一个文法是 LL(1) 的?</p>
+<p>一个文法 <code>G</code> 是 LL(1) 的,
+当且仅当 <code>G</code> 的任意两个不同的产生式
+<code>A -&gt; α | β</code>
+满足以下条件:</p>
+<ol>
+<li><span class="arithmatex">\(FIRST(\alpha)\cap FIRST(\beta)=\emptyset\)</span>;</li>
+<li><span class="arithmatex">\(\epsilon\in FIRST(\beta)\Rightarrow FIRST(\alpha)\cap FOLLOW(A)=\emptyset\)</span>, 反之亦然.</li>
+</ol>
+<h3 id="444">4.4.4 非递归的预测分析<a class="headerlink" href="#444" title="Permanent link">&para;</a></h3>
+<!-- 末尾 -->
+
+<p>已匹配+输入=all</p>
+<h3 id="445">4.4.5 预测分析中的错误恢复<a class="headerlink" href="#445" title="Permanent link">&para;</a></h3>
+<!-- ppt64 -->
+
+<p><strong>发现错误</strong>:</p>
+<p>考虑一个由分析表驱动的预测分析器的栈, 当以下两种情况之一发生时预测语法分析过程就可以检测到语法错误:</p>
+<ol>
+<li>栈顶的终结符号和下一个输入符号不匹配;</li>
+<li>非终结符号 <span class="arithmatex">\(A\)</span> 处于栈顶, <span class="arithmatex">\(a\)</span> 是下一个输入符号, 且 <span class="arithmatex">\(M[A, a]\)</span> 为 error (即相应的语法分析表条目为空).</li>
+</ol>
+<blockquote>
+<p>对于由分析表驱动的预测分析器, 它的栈明确地显示了语法分析器期望用哪些终结符号/非终结符号来匹配余下的输入; 同样的方法也可以用于递归下降分析器 (它的栈是隐式的).</p>
+</blockquote>
+<h4 id="_5">恐慌模式<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<p>紧急错误恢复策略.</p>
+<p>跳过一些输入符号, 直到出现一个期望的同步记号
+(有效性依赖于同步记号集合的选择).</p>
+<p>(示例) 启发式规则: 同步记号的选择</p>
+<!-- !只是简略版 -->
+
+<table>
+<thead>
+<tr>
+<th>No.</th>
+<th>Rule</th>
+<th>Example (action/rule)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>将 <span class="arithmatex">\(FOLLOW(A)\)</span> 中的所有符号放入非终结符 <span class="arithmatex">\(A\)</span> 的同步记号集合</td>
+<td>跳过一些记号, 直到看到 <span class="arithmatex">\(FOLLOW(A)\)</span> 中的元素时, 再把 <span class="arithmatex">\(A\)</span> 弹出栈</td>
+</tr>
+<tr>
+<td>2</td>
+<td>将较高层构造的开始符号加入到较低层构造的同步集合中;</td>
+<td>把语句开头的关键字加人到生成表达式的非终结符号的同步集合中去</td>
+</tr>
+<tr>
+<td>3</td>
+<td>把 <span class="arithmatex">\(FIRST(A)\)</span> 的符号加入 <span class="arithmatex">\(A\)</span> 的同步集合</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>如果非终结符可以产生空串, 若出错时栈顶是这样的非终结符, 则可使用产生空串的产生式</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>如果终结符在栈顶而不能匹配, 简单的方法是弹出此终结符</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<!-- !... -->
+
+<h4 id="_6">短语层次的恢复<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
+<p><strong>实现方法</strong>: 在预测语法分析表的空白条目中填写指向处理例程的指针.
+这些例程可以改变/插入/删除输人中的符号, 并发出适当的错误消息.
+它们也可能执行一些出栈操作.</p>
+<!-- !会出现的问题, 原因 (ppt70)-->
+
+<h2 id="45">4.5 自底向上的分析<a class="headerlink" href="#45" title="Permanent link">&para;</a></h2>
+<p>bottom-up 语法分析的通用框架: 移入-归约语法分析.</p>
+<h3 id="451">4.5.1 归约<a class="headerlink" href="#451" title="Permanent link">&para;</a></h3>
+<p>bottom-up 的语法分析过程可以看成将一个串 <span class="arithmatex">\(w\)</span> "归约" 为文法开始符号的过程.</p>
+<p>在单个
+<strong>归约</strong>
+(reduction)
+步骤中,
+一个与某产生式体相匹配的特定子串被替换为该产生式头部的非终结符号.</p>
+<p>因此, 核心问题是: 选择文法符号串的哪一个子串进行归约?</p>
+<p>根据定义,
+一次归约是一个推导步骤的反向操作,
+因此,
+自底向上语法分析的目标是反向构造一个推导过程.</p>
+<h4 id="452">4.5.2 句柄剪枝<a class="headerlink" href="#452" title="Permanent link">&para;</a></h4>
+<p><strong>句柄</strong> (handle):</p>
+<ul>
+<li>(非正式定义):
+  和某个产生式体匹配的子串,
+  对它的归约代表了相应的最右推导中的一个反向步骤;</li>
+<li>(<strong>正式定义</strong>):
+  如果有
+  <span class="arithmatex">\(S\overset{*}\underset{rm}\Rightarrow\alpha A \omega\underset{rm}\alpha\beta\omega\)</span>,
+  则紧跟
+  <span class="arithmatex">\(\alpha\)</span>
+  的产生式
+  <span class="arithmatex">\(A\rightarrow \beta\)</span>
+  是
+  <span class="arithmatex">\(\alpha\beta\omega\)</span>
+  的一个句柄.
+  为了方便起见,
+  也会将产生式体 <span class="arithmatex">\(\beta\)</span> 称为一个句柄.</li>
+</ul>
+<blockquote>
+<p>句柄右边的 <span class="arithmatex">\(\omega\)</span> 一定只包含终结符号.</p>
+</blockquote>
+<p>如果文法无二义, 则句柄是唯一的.
+(hint: 无二义性对应最右推导唯一性)</p>
+<p><strong>活前缀</strong></p>
+<h4 id="453-">4.5.3 移入-归约语法分析技术<a class="headerlink" href="#453-" title="Permanent link">&para;</a></h4>
+<!-- 趁我还记得, 先写一下: 貌似预测分析和移入归约的入栈方向是反着来的 -->
+
+<p>四种动作:</p>
+<ol>
+<li>移入 (shift)</li>
+<li>归约 (reduce)</li>
+<li>接受 (accept)</li>
+<li>报错 (error)</li>
+</ol>
+<p>实现:
+句柄的选择</p>
+<p>句柄的性质:
+句柄总是出现在栈的顶端, 绝不会出现在栈的中间</p>
+<h4 id="454-">4.5.4 移入-归约语法分析中的冲突<a class="headerlink" href="#454-" title="Permanent link">&para;</a></h4>
+<!-- ! -->
+
+<h2 id="46-lr-lr">4.6 LR 语法分析技术介绍: 简单 LR 技术<a class="headerlink" href="#46-lr-lr" title="Permanent link">&para;</a></h2>
+<h3 id="461-lr">4.6.1 为什么使用 LR 语法分析器<a class="headerlink" href="#461-lr" title="Permanent link">&para;</a></h3>
+<h3 id="462-lr0">4.6.2 项和 LR(0) 自动机<a class="headerlink" href="#462-lr0" title="Permanent link">&para;</a></h3>
+<h3 id="463-lr">4.6.3 LR 语法分析算法<a class="headerlink" href="#463-lr" title="Permanent link">&para;</a></h3>
+<h3 id="464-slr">4.6.4 构造 SLR 语法分析表<a class="headerlink" href="#464-slr" title="Permanent link">&para;</a></h3>
+<h3 id="465">4.6.5 可行前缀<a class="headerlink" href="#465" title="Permanent link">&para;</a></h3>
+<!-- !与 LL 分析的区别 -->
+
+<!--
+.6 二义文法的应用和自底向上分析的错误处理
+.7 语法分析器生成工具
+
+
+4.7 更强大的LR语法分析器 182
+4.7.1 规范LR(1)项  182
+4.7.2 构造LR(1)项集 183
+4.7.3 规范LR(1)语法分析表  186
+4.7.4 构造LALR语法分析表   187
+4.7.5 高效构造LALR语法分析表的方法  190
+4.7.6 LR语法分析表的压缩    193
+4.7.7 4.7 节的练习  194
+4.8 使用二义性文法 195
+4.8.1 用优先级和结合性解决冲突  195
+4.8.2  "悬空-else" 的二义性   196
+4.8.3 LR语法分析中的错误恢复  198
+4.8.4 4.8 节的练习  199
+4.9 语法分析器生成工具   200
+4.9.1 语法分析器生成工具Yacc 200
+4.9.2 使用带有二义性文法的Yacc规约  202
+4.9.3 用Lex创建Yacc的词法分析器  204
+4.9.4 Yacc中的错误恢复    205
+-->
+
+<h2 id="_7">参考资料<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p>1.<a href="https://blog.reverberate.org/2013/09/ll-and-lr-in-context-why-parsing-tools.html">LL and LR in Context: Why Parsing Tools Are Hard</a>: 一篇 Google 工程师写的小短文, 有功夫了我想好好研究一下</p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" data-md-state="hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="chap_03.html" class="md-footer__link md-footer__link--prev" aria-label="上一页: C3 词法分析" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              C3 词法分析
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="chap_05.html" class="md-footer__link md-footer__link--next" aria-label="下一页: C5 语法制导的翻译" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              C5 语法制导的翻译
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": ["search.suggest", "search.highlight", "navigation.top"], "translations": {"clipboard.copy": "\u590d\u5236", "clipboard.copied": "\u5df2\u590d\u5236", "search.config.lang": "ja", "search.config.pipeline": "trimmer, stemmer", "search.config.separator": "[\\uff0c\\u3002]+", "search.placeholder": "\u641c\u7d22", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.477d984a.min.js", "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.ddd52ceb.min.js"></script>
+      
+        <script src="javascripts/config.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

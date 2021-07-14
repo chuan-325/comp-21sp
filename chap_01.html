@@ -1,0 +1,1520 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.1, mkdocs-material-7.1.10">
+    
+    
+      
+        <title>C1 编译概论 - Notes for Compiler Principles</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.1fe995fd.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.f1a3b89f.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#009485">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <script>function __prefix(e){return new URL(".",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#c1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="Notes for Compiler Principles" class="md-header__button md-logo" aria-label="Notes for Compiler Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Notes for Compiler Principles
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              C1 编译概论
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/chuan-325/comp-21sp/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chuan-325/comp-21sp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="Notes for Compiler Principles" class="md-nav__button md-logo" aria-label="Notes for Compiler Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    Notes for Compiler Principles
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/chuan-325/comp-21sp/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chuan-325/comp-21sp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      <label class="md-nav__link" for="__nav_2">
+        Note
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Note" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Note
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          C1 编译概论
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="chap_01.html" class="md-nav__link md-nav__link--active">
+        C1 编译概论
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    1.1 语言处理器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    1.2 编译器的结构
+  </a>
+  
+    <nav class="md-nav" aria-label="1.2 编译器的结构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#121" class="md-nav__link">
+    1.2.1 词法分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122" class="md-nav__link">
+    1.2.2 语法分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123" class="md-nav__link">
+    1.2.3 语义分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#124" class="md-nav__link">
+    1.2.4 中间代码生成
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#125" class="md-nav__link">
+    1.2.5 代码优化
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#126" class="md-nav__link">
+    1.2.6 代码生成
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#127" class="md-nav__link">
+    1.2.7 符号表管理
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#128" class="md-nav__link">
+    1.2.8 将多个阶段组合成 "趟"
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#129" class="md-nav__link">
+    1.2.9 编译器构造工具
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13" class="md-nav__link">
+    1.3 程序设计语言的发展历程
+  </a>
+  
+    <nav class="md-nav" aria-label="1.3 程序设计语言的发展历程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    程序设计语言发展对编译器的影响
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14" class="md-nav__link">
+    1.4 构造一个编译器的相关科学
+  </a>
+  
+    <nav class="md-nav" aria-label="1.4 构造一个编译器的相关科学">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141" class="md-nav__link">
+    1.4.1 编译器设计和实现中的建模
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142" class="md-nav__link">
+    1.4.2 代码优化的科学
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15" class="md-nav__link">
+    1.5 编译技术的应用
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16" class="md-nav__link">
+    1.6 程序设计语言基础
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 程序设计语言基础">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161" class="md-nav__link">
+    1.6.1 静态和动态的区别
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#162" class="md-nav__link">
+    1.6.2 环境与状态
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#163" class="md-nav__link">
+    1.6.3 静态作用域和块结构
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#164" class="md-nav__link">
+    1.6.4 显式访问控制
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#165" class="md-nav__link">
+    1.6.5 动态作用域
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#166" class="md-nav__link">
+    1.6.6 参数传递机制
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#167" class="md-nav__link">
+    1.6.7 别名
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    第 1 章小结
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_02.html" class="md-nav__link">
+        C2 一个简单的语法制导翻译器
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_03.html" class="md-nav__link">
+        C3 词法分析
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_04.html" class="md-nav__link">
+        C4 语法分析
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_05.html" class="md-nav__link">
+        C5 语法制导的翻译
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_08.html" class="md-nav__link">
+        C8 代码生成和优化
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      <label class="md-nav__link" for="__nav_3">
+        Homework
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Homework" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Homework
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_01.html" class="md-nav__link">
+        hw-01-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_02_01.html" class="md-nav__link">
+        hw-02-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_02_02.html" class="md-nav__link">
+        hw-02-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_03_01.html" class="md-nav__link">
+        hw-03-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_03_02.html" class="md-nav__link">
+        hw-03-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_01.html" class="md-nav__link">
+        hw-04-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_02.html" class="md-nav__link">
+        hw-04-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_03.html" class="md-nav__link">
+        hw-04-03
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    1.1 语言处理器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    1.2 编译器的结构
+  </a>
+  
+    <nav class="md-nav" aria-label="1.2 编译器的结构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#121" class="md-nav__link">
+    1.2.1 词法分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122" class="md-nav__link">
+    1.2.2 语法分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123" class="md-nav__link">
+    1.2.3 语义分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#124" class="md-nav__link">
+    1.2.4 中间代码生成
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#125" class="md-nav__link">
+    1.2.5 代码优化
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#126" class="md-nav__link">
+    1.2.6 代码生成
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#127" class="md-nav__link">
+    1.2.7 符号表管理
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#128" class="md-nav__link">
+    1.2.8 将多个阶段组合成 "趟"
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#129" class="md-nav__link">
+    1.2.9 编译器构造工具
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13" class="md-nav__link">
+    1.3 程序设计语言的发展历程
+  </a>
+  
+    <nav class="md-nav" aria-label="1.3 程序设计语言的发展历程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    程序设计语言发展对编译器的影响
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14" class="md-nav__link">
+    1.4 构造一个编译器的相关科学
+  </a>
+  
+    <nav class="md-nav" aria-label="1.4 构造一个编译器的相关科学">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141" class="md-nav__link">
+    1.4.1 编译器设计和实现中的建模
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142" class="md-nav__link">
+    1.4.2 代码优化的科学
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15" class="md-nav__link">
+    1.5 编译技术的应用
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16" class="md-nav__link">
+    1.6 程序设计语言基础
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 程序设计语言基础">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161" class="md-nav__link">
+    1.6.1 静态和动态的区别
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#162" class="md-nav__link">
+    1.6.2 环境与状态
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#163" class="md-nav__link">
+    1.6.3 静态作用域和块结构
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#164" class="md-nav__link">
+    1.6.4 显式访问控制
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#165" class="md-nav__link">
+    1.6.5 动态作用域
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#166" class="md-nav__link">
+    1.6.6 参数传递机制
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#167" class="md-nav__link">
+    1.6.7 别名
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    第 1 章小结
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/chuan-325/comp-21sp/edit/master/docs/chap_01.md" title="编辑此页" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="c1">C1 编译概论<a class="headerlink" href="#c1" title="Permanent link">&para;</a></h1>
+<h2 id="11">1.1 语言处理器<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
+<p><strong>编译</strong>: 从源语言 (或某种低层语言) 表示的算法到面向硬件的目标语言表示的算法的一个等价变换<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> .</p>
+<h2 id="12">1.2 编译器的结构<a class="headerlink" href="#12" title="Permanent link">&para;</a></h2>
+<h3 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h3>
+<p>编译器不仅要将源程序<strong>映射</strong>为 <em>语义等价</em> 且 <em>可以执行</em> 的目标程序, 还要对程序进行<strong>优化</strong>.</p>
+<p>从源程序<strong>映射</strong>到可执行目标程序, 过程可以分为两部分:</p>
+<ol>
+<li><strong>分析</strong>: 通常称为前端<ul>
+<li>中间表示: 将程序分解成为多个组成要素, 并加上语法结构, 创建中间表示</li>
+<li>检错: 检测语法或语义上的不一致性, 报错</li>
+<li>综合的前置步骤将<strong>符号表</strong> &amp; <strong>中间表示</strong> (IR) 一起传递给综合部分</li>
+</ul>
+</li>
+<li><strong>综合</strong>: 通常称为后端<ul>
+<li>根据中间表示和符号表构造目标程序</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>分为前端 &amp; 后端的一个重要考虑是<strong>便于移植</strong>.</p>
+<p><strong>优化</strong>既有分析, 也有综合.</p>
+</blockquote>
+<p><img alt="compiler-workflow." src="chap_01.assets/compiler-workflow.png" style="height:400px" /></p>
+<p><strong>语法树</strong>: 语法分析生成语法树, 语义分析生成的语法树是已经经过修饰的语法树.</p>
+<p><strong>中间表示</strong> (IR): 一般将 <strong>语法树</strong>, <strong>带注释的语法树</strong>, <strong>中间代码</strong>, <strong>符号表</strong> 等统称为中间表示.</p>
+<p><strong>符号表</strong>: 贯穿编译的各个阶段, 甚至在程序运行时都有作用.</p>
+<p><strong>错误处理</strong>: 在编译的各个阶段都有所涉及, 但是编译能够发现的错误大多是在编译器的前端阶段发现的.</p>
+<p><strong>Preview by Example</strong>: 编译赋值语句</p>
+<p><img alt="translation-of-an-assignment-statement." src="chap_01.assets/translation-of-an-assignment-statement.png" style="height:540px" /></p>
+<h3 id="121">1.2.1 词法分析<a class="headerlink" href="#121" title="Permanent link">&para;</a></h3>
+<p><strong>词法分析程序 (Scanner)</strong> 将源程序的字符流组成记号流, 并在词法分析的同时完成一些可行的操作, 如填符号表.</p>
+<p><strong>记号</strong>: 逻辑上有内聚力的字符序列.</p>
+<p><strong>单词</strong>: 形成记号的字符序列, 被称为该记号的单词;</p>
+<ul>
+<li>形如: <code>&lt;token-name, attribute-value&gt;</code>.</li>
+</ul>
+<blockquote>
+<p><strong>例</strong> (词法分析)</p>
+<p>赋值语句: <code>position = initial + rate \* 60</code>
+词法分析后可以得到 7 个单词:</p>
+<ul>
+<li>标识符 <code>position(&lt;id,1&gt;)</code> , 赋值号=<code>(=/assignop)</code> , 标识符 <code>initial(&lt;id,2&gt;)</code> , 加号 <code>+(+/addop)</code> , 标识符 <code>rate(&lt;id,3&gt;)</code> , 乘号 <code>*(*/multop)</code> , 数字 60 <code>(60/&lt;num,60&gt;)</code>.</li>
+</ul>
+</blockquote>
+<h3 id="122">1.2.2 语法分析<a class="headerlink" href="#122" title="Permanent link">&para;</a></h3>
+<p><strong>语法分析程序 (Parser)</strong> 将记号流按语言的语法结构层次分组, 最终得到分析树或语法树 (syntax tree).</p>
+<p><strong>语法树</strong>: 每个内部节点表示一个计算 (如前例的 =<code>, +</code>, _ 等), 而叶子节点表示参与运算的记号; 树的层次表征了计算的优先次序 (如本例中 _ 优先于 + ).</p>
+<ul>
+<li>语法树是编译器后续工作的依托.</li>
+</ul>
+<blockquote>
+<p><strong>例</strong> (语法分析)</p>
+<p><img alt="parser-example." src="chap_01.assets/parser-example.png" style="height:200px" /></p>
+</blockquote>
+<h3 id="123">1.2.3 语义分析<a class="headerlink" href="#123" title="Permanent link">&para;</a></h3>
+<p><strong>语义分析程序 (Semantic Analyzer)</strong> 检查程序的语义正确性.</p>
+<p><strong>语义</strong>: 程序的语义决定了程序的运行.</p>
+<p><strong>静态语义</strong>: 程序设计语言中存在在执行前可以确定而不易被语法表示的特征, 这些特征称为静态语义. 静态语义也是语义分析的内容.</p>
+<p>典型的静态语义一般包括<strong>声明</strong>和<strong>类型检查</strong>等.</p>
+<ul>
+<li>类型检查: 检测每个算符是否具有匹配的运算对象</li>
+<li>可能会增加强制类型转换</li>
+</ul>
+<p>语义分析程序计算得到额外信息 (如数据类型) 等, 这些额外信息将作为属性 (attribute), 填加到语法树中.</p>
+<blockquote>
+<p><strong>例</strong> (语义分析)</p>
+<p><img :=":" alt="semantic-analyzer-example." src="chap_01.assets/semantic-analyzer-example.png" style="height:200px" /></p>
+</blockquote>
+<h3 id="124">1.2.4 中间代码生成<a class="headerlink" href="#124" title="Permanent link">&para;</a></h3>
+<p>把一个源程序翻译成目标代码的过程中, 一个编译器可能构造出一个或多个中间表示.</p>
+<p>不同编译器选择的中间代码可能不同</p>
+<ul>
+<li>(中间代码?) 是对机器的一种抽象</li>
+<li>选择依据: 要易于生成, 且能够轻松翻译为目标机器语言</li>
+</ul>
+<p><strong>三地址代码</strong>是一种常用的低层表示:</p>
+<ul>
+<li>每个指令具有 3 个运算分量</li>
+<li>每条赋值指令右部只能有 1 个运算符, 指令次序决定了运算完成的顺序</li>
+<li>编译器应该生成 1 个临时名字, 用来存放一个三地址指令计算得到的值</li>
+<li>有些指令, 其运算对象可以少于 3 个</li>
+</ul>
+<blockquote>
+<p><strong>例</strong> (生成三地址代码序列)</p>
+</blockquote>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>t1 = inttofloat(60)
+t2 = id3 * t1
+t3 = id2 + t2
+id1 = t3
+</code></pre></div>
+</td></tr></table>
+<h3 id="125">1.2.5 代码优化<a class="headerlink" href="#125" title="Permanent link">&para;</a></h3>
+<p><strong>机器无关优化</strong>: 改变中间代码, 得到更好的目标代码.</p>
+<blockquote>
+<p><strong>例</strong> (Intersting fact about code optimization)</p>
+<ul>
+<li>一种合理的优质目标代码生成方法: 使用一个简单的算法生成中间代码, 其后再对其进行代码优化;</li>
+<li>一种常见的优化方式: 将可以提前到编译时刻完成的工作尽可能在编译时刻完成;<ul>
+<li>例: 将前例中的 <code>60</code> 直接变成 <code>60.0</code> , 可以消除 <code>inttofloat</code> 运算.</li>
+<li>Risk case: 由于编译程序的计算机与目标程序运行的计算机可能是不一样的, 在编译时刻完成某些工作, 可能是有风险的, 因此, 一种可能的方式是把要在编译时刻完成的计算放在目标机上真实执行, 把得到的计算结果用于编译器的优化和代码生成中</li>
+</ul>
+</li>
+</ul>
+<p>不同的编译器, 它们的优化存在很大的差异.</p>
+</blockquote>
+<p><strong>目标代码优化器 (Target Code Optimizer)</strong>: 改进目标代码.</p>
+<blockquote>
+<p><strong>例</strong> (目标代码优化器):</p>
+<ul>
+<li>选择合适的编址模式, 以提高程序性能</li>
+<li>将速度慢的指令换为速度快的指令</li>
+<li>删除多余的代码</li>
+<li>寄存器优化</li>
+<li>软流水</li>
+<li>...</li>
+</ul>
+</blockquote>
+<h3 id="126">1.2.6 代码生成<a class="headerlink" href="#126" title="Permanent link">&para;</a></h3>
+<p><strong>代码生成器 (Code Generator)</strong> 将源程序对应的中间表示映射到目标语言, 生成目标代码.</p>
+<ul>
+<li>如果目标语言是机器代码, 那么将变量映射为其在机器上的存储位置;</li>
+<li>目标机器的特性是代码生成情况的主要影响因素;</li>
+<li>寄存器的合理使用是一个重要问题.</li>
+</ul>
+<blockquote>
+<p><strong>例</strong> (代码生成)</p>
+</blockquote>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>LDF R2, id3
+MULF R2, R2, #60.0
+LDF R1, id2
+ADDF R1, R1, R2
+STF id1, R1
+</code></pre></div>
+</td></tr></table>
+<h3 id="127">1.2.7 符号表管理<a class="headerlink" href="#127" title="Permanent link">&para;</a></h3>
+<p>每个名字一个表项, 其中信息对存储管理等很重要.</p>
+<h3 id="128">1.2.8 将多个阶段组合成 "趟"<a class="headerlink" href="#128" title="Permanent link">&para;</a></h3>
+<p>对于一个特定的实现, 前述的步骤都可以组合成为一个 "趟", 每趟读入一个输入文件, 并产生一个输出文件, 实现对程序的一趟处理.</p>
+<h3 id="129">1.2.9 编译器构造工具<a class="headerlink" href="#129" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p><strong>Reading</strong></p>
+<p>编译器是一个复杂的系统软件, 真实编译器的开发需要大量的工具的支持, 包括常规的软件开发类工具, 以及编译器开发特色的构造工具</p>
+<p>特色工具: 使用专用语言描述和实现特定的组件, 本身算法可能很复杂, 但可以对编译器开发者隐藏细节</p>
+<p>常用的工具:</p>
+<ul>
+<li>语法分析器的生成器, 如 YACC</li>
+<li>扫描器的生成器, 如 Lex</li>
+<li>语法制导翻译的引擎</li>
+<li>代码生成器的生成器, 基于规则生成代码生成器</li>
+<li>数据流分析引擎</li>
+<li>编译器构造工具集: 提供了构造编译器的不同阶段的例程地完整集合</li>
+</ul>
+</blockquote>
+<h2 id="13">1.3 程序设计语言的发展历程<a class="headerlink" href="#13" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>历史进程略.</p>
+</blockquote>
+<p>程序设计语言必须要有明确而确切的<strong>定义</strong>:</p>
+<ul>
+<li>语法:合法程序的构成规则<ul>
+<li>语法规则要满足: 可读性/ 可写性/ 易检验性/ 易翻译性/ 无二义性</li>
+</ul>
+</li>
+<li>语义: 构成程序的各个语法成分的意义; 程序的执行效果说明了程序的语义<ul>
+<li>静态程序语义: 编译时刻可以确定的语义</li>
+<li>动态程序语义: 运行时刻才能确定的语义</li>
+</ul>
+</li>
+<li>语用: 语言符号与使用者之间的关系, 如变量的物理意义等</li>
+</ul>
+<h3 id="_1">程序设计语言发展对编译器的影响<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>新的成分/ 机制的出现, 要求新的编译技术支持<ul>
+<li>新的需求</li>
+<li>对编译实现的支持</li>
+</ul>
+</li>
+</ul>
+<h4 id="_2">编译器技术的发展对语言的有力支持<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>优化效果是程序设计语言普及的一个重要推动因素</li>
+<li>编译技术的发展可以简化/ 改良语言的设计</li>
+</ul>
+<blockquote>
+<p>语言种类的相关介绍略.</p>
+</blockquote>
+<h2 id="14">1.4 构造一个编译器的相关科学<a class="headerlink" href="#14" title="Permanent link">&para;</a></h2>
+<h3 id="141">1.4.1 编译器设计和实现中的建模<a class="headerlink" href="#141" title="Permanent link">&para;</a></h3>
+<ul>
+<li>建模抽象出数学范式, 设计, 通过实际测试来验证;</li>
+<li>编译器的处理必须保证被编译程序的语义不变;</li>
+<li>好的编译器具有普适性, 使得其编译的程序普遍获益.</li>
+</ul>
+<p>最基本的数学模型是 FSM, RE, CFG 和树结构.</p>
+<h3 id="142">1.4.2 代码优化的科学<a class="headerlink" href="#142" title="Permanent link">&para;</a></h3>
+<p>优化: 编译器通过优化, 以生成更高效的代码.</p>
+<p>编译器优化必须满足下面的设计目标:</p>
+<ul>
+<li>优化必须是正确的, 也就是说, 不能改变被编译程序的含义;</li>
+<li>优化必须能够改善很多程序的性能;</li>
+<li>优化所需的时间必须保持在合理的范围内;</li>
+<li>所需要的工程方面的工作必须是可管理的;</li>
+</ul>
+<h2 id="15">1.5 编译技术的应用<a class="headerlink" href="#15" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>编译技术在其他领域的应用有:</p>
+<ul>
+<li>高级程序设计语言的实现</li>
+<li>针对计算机体系结构的优化</li>
+<li>新计算机体系结构的设计</li>
+<li>程序翻译</li>
+<li>软件生产率工具
+  具体内容略.</li>
+</ul>
+</blockquote>
+<h2 id="16">1.6 程序设计语言基础<a class="headerlink" href="#16" title="Permanent link">&para;</a></h2>
+<h3 id="161">1.6.1 静态和动态的区别<a class="headerlink" href="#161" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>在为一个语言设计一个编译器时, 最重要的问题之一是 <strong>"编译器对一个程序可以做出哪些判定"</strong>, 而另一个问题是 <strong>"(语言中的) 声明具有何种作用域"</strong>.</p>
+</blockquote>
+<h4 id="q1">Q1: 编译器对程序可做出何种判定<a class="headerlink" href="#q1" title="Permanent link">&para;</a></h4>
+<p><strong>静态策略</strong>: 如果某个语言使用的策略支持编译器 <strong>静态</strong> 决定某个问题, 则称这个语言使用了一个 <strong>静态策略</strong>, 或者说这个问题可以在 <strong>编译时刻</strong> (compile time) 决定.</p>
+<ul>
+<li>如 C 语言中的变量名/ 变量类型.</li>
+</ul>
+<p><strong>动态策略</strong>: 一个只允许在运行程序的时候做出决定的策略被称为 <strong>动态策略</strong> (dynamic policy), 或者被认为需要在 <strong>运行时刻</strong> (run time) 做出决定.</p>
+<ul>
+<li>如 C 语言程序变量 <em>(非常量)</em> 的值</li>
+</ul>
+<h4 id="q2">Q2: 声明具有何种作用域<a class="headerlink" href="#q2" title="Permanent link">&para;</a></h4>
+<p><strong>静态作用域</strong> (static scope): 如果仅通过阅读程序就可以确定一个声明的作用域, 那么这个语言使用的是<strong>静态作用域</strong>, 或者说<strong>词法作用域</strong> (lexical scope).</p>
+<p><strong>动态作用域</strong> (dynamic scope): 如果仅通过阅读程序 <strong>无法</strong> 确定一个声明的作用域, 那么这个语言使用的是<strong>动态作用域</strong>.</p>
+<blockquote>
+<p>如果使用动态作用域, 当程序运行时, 同一个对 x 的使用会指向 x 的几个声明中的某一个.</p>
+<p>大部分语言 (比如 C 和 Java) 使用静态作用域.</p>
+</blockquote>
+<h3 id="162">1.6.2 环境与状态<a class="headerlink" href="#162" title="Permanent link">&para;</a></h3>
+<p><strong>环境</strong> (environment): 从名字到存储位置的映射; 如果认为变量就是内存位置, 也可以理解为名字到变量的映射.</p>
+<ul>
+<li>如 C 语言中的左值<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup> 到内存位置的对应.</li>
+</ul>
+<p><strong>状态</strong> (state): 从内存位置到它们的值的映射.</p>
+<ul>
+<li>如 C 语言中将左值映射为它们的相应右值.</li>
+</ul>
+<p><img alt="name-environment-state-value." src="chap_01.assets/name-environment-state-value.png" style="height:150px" /></p>
+<h3 id="163">1.6.3 静态作用域和块结构<a class="headerlink" href="#163" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>本节内容: 考虑块结构语言的静态作用域规则, 其中块 (block) 是声明和语句的一个组合.</p>
+</blockquote>
+<p><strong>块结构</strong> (block structure): 允许一个块嵌套在另一个块内的嵌套特性.</p>
+<p>" D 属于 B ": 如果块 B 是包含声明 D 的最内存的块, 那么称 D 属于 B.</p>
+<blockquote>
+<p>以 C 语言中的 "块" 的语法为 "块" 的实例:</p>
+<ul>
+<li>块是一种语句</li>
+<li>一个块包含了一个声明的序列</li>
+<li>"块" 允许嵌套 <em>(函数不允许)</em> , 因此作用域规则需要考虑到嵌套的问题</li>
+</ul>
+</blockquote>
+<p>在一个<strong>块结构语言</strong>中, <strong>关于变量声明的静态作用域规则</strong>如下:
+<em>(以下是从 PPT 上抄的人话部分, 标准的表述请看书本)</em></p>
+<ul>
+<li>讨论名字 x 的一个顶层声明的作用域: <em>(难以理解则可以以 C 语言为例)</em><ul>
+<li>从声明的位置开始起作用,</li>
+<li>如果函数中有对同名变量的声明, 则会在<strong>函数体</strong>内产生<strong>局部作用域</strong>, 并在<strong>函数体</strong>内覆盖该同名全局变量的全局作用域, 因此作用域可能存在 "<strong>洞</strong>".</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>Reading</strong>: 过程, 函数, 方法</p>
+<ul>
+<li>共同点: 都可以表示被调用的子程序</li>
+<li>注意:<ul>
+<li>在 "编译原理" 课程中, 如果不影响理解, 统称为 "过程"</li>
+<li>虚假的不同点: C 语言中只有函数, Java 语言中只有方法</li>
+<li>真实的不同点: 函数 = (可以)有返回值, Java = 无返回值</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h3 id="164">1.6.4 显式访问控制<a class="headerlink" href="#164" title="Permanent link">&para;</a></h3>
+<p><code>class</code> , <code>struct</code> 等语言规范对象引入了新的作用域,</p>
+<ul>
+<li>可以通过 <code>public</code>, <code>private</code>, <code>protected</code> 等关键字显式地指明对象的合法访问的属;</li>
+<li>一个名字可以被声明它的作用域代码段外围的程序访问.</li>
+</ul>
+<blockquote>
+<p><strong>Reading</strong>: 声明, 定义</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>对于变量</th>
+<th>对于过程 <em>(以方法为例)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>声明</td>
+<td>告知类型</td>
+<td>给出方法的<strong>范型</strong> <em>(即: 方法的参数, 结果的类型)</em></td>
+</tr>
+<tr>
+<td>定义</td>
+<td>告知赋值</td>
+<td>给出一个方法的代码</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<h3 id="165">1.6.5 动态作用域<a class="headerlink" href="#165" title="Permanent link">&para;</a></h3>
+<h4 id="_3">动态作用域的含义<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<p><strong>动态作用域</strong>:</p>
+<ul>
+<li>理论上的定义: 一个作用域的策略依赖于一个 or 多个只有在程序执行时刻才能知道的因素</li>
+<li>实际上的定义: 对一个名字 x 的使用指向的是最近被调用但还没有终止且声明了 x 的过程中的这个声明.<ul>
+<li>提供英文原文: a use of a name x refers to the declaration of x in the most recently called, not-yet-terminated, procedure with such a declaration.</li>
+</ul>
+</li>
+</ul>
+<p>从过程的视角来分析 <strong>动态作用域</strong>:</p>
+<ul>
+<li><strong>讨论</strong>: 过程 f 中对一个名字 x 的使用指向?<ul>
+<li>x 在 g 中声明</li>
+<li>程序先调用了 g , 再调用了 f , 并且对 g 的调用还没有执行完</li>
+<li>在 g 的末次调用与 f 的当次调用之间, 未调用过任何<strong>声明过 x 的任何过程 (包括 g 自身)</strong></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>课本上举了全局声明和局部声明在函数调用中的例子, 但是这个和
+真正的动态作用域有区别.</p>
+<p>一个更真实的例子是面向对象语言中调用方法 <code>x.m()</code> 时要由当
+时 <code>x</code> 所指向的对象的类来决定, 但某些场景下编译时刻不能指
+出 <code>x</code> 指向的对象.</p>
+</blockquote>
+<h4 id="vs">比较: 动态作用域 vs 静态作用域<a class="headerlink" href="#vs" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>作用域含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>静态作用域</td>
+<td>根据源程序中的嵌套声明的位置关系解释</td>
+</tr>
+<tr>
+<td>动态作用域</td>
+<td>根据过程的调用实例的执行轨迹的包含关系来解释</td>
+</tr>
+</tbody>
+</table>
+<p>动态作用域和静态作用域的差异, 主要影响到<strong>对当前执行的过程中没有声明的对象 x 的解释</strong>.</p>
+<h3 id="166">1.6.6 参数传递机制<a class="headerlink" href="#166" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>程序设计语言都具有 "过程" , 我们需要关注 "过程" 中 <strong>实参和形参是如何关联起来的</strong>. 大部分语言要么使用 <strong>值调用</strong>, 要么使用 <strong>引用调用</strong>, 或者两者都用. 此外, 历史上还出现过 "名调用".</p>
+</blockquote>
+<h4 id="_4">值调用<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
+<p><strong>值调用</strong> (call-by-value):</p>
+<ul>
+<li>行为:<ul>
+<li>对实在参数<strong>求值</strong>(表达式) or <strong>拷贝</strong>(变量),</li>
+<li>这些值被放在属于被调用过程的相应形参内存位置上;</li>
+</ul>
+</li>
+<li>效果:<ul>
+<li>被调用过程所做的所有有关形参的计算都局限于这个过程内,</li>
+<li>相应的实参本身不会被改变,</li>
+<li>被调用过程可以通过非局部名字或通过显式传递的指针值影响调用者.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>C 和 Java 都有使用值调用.</p>
+<p>由于众所周知的值调用有 "形参/实参分离" 的特性, 因此有了"传递指针"的折中方法.</p>
+</blockquote>
+<h4 id="_5">引用调用<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<p><strong>引用调用</strong> (call-by-reference):</p>
+<ul>
+<li>行为:<ul>
+<li>实参的地址作为相应形参的值传递给被调用者,</li>
+<li>在被调用者的代码中使用形参时, 沿着这个指针找到调用者指明的内存位置;</li>
+</ul>
+</li>
+<li>效果:<ul>
+<li>(在被调用者中) 改变形参, 看起来就像改变了实参一样,</li>
+<li><strong>例外</strong>: 但是! 如果实参是表达式, 则先依据表达式求值, 将表达式的值存放在另一个地方, 然后形参的改变只改变这个位置上的值, 但是对调用者的数据毫无影响.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>数组一般是依靠引用调用传递的.</p>
+<p>当形参是一个大型的对象/ 数组/ 结构时, 引用调用几乎是必不可少的, 因为严格的值调用要求调用者把整个实在参数拷贝到属于相应形式参数的空间上. 当参数很大时, 这种拷贝可能代价高昂.</p>
+</blockquote>
+<h4 id="_6">名调用*<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
+<p><strong>名调用</strong> (出现在 Algol 60 中) 要求被调用者的运行方式好像是用实在参数以字面方式替换了被调用者的代码中的形式参数一样. 这么做, 就好像形式参数是一个代表了实在参数的宏. 当然, 被调用过程的局部名字需要进行重命名, 以便把它们和调用者中的名字区别开来.</p>
+<blockquote>
+<p>当实在参数是一个表达式而不是一个变量时, 会发生一些和直觉不符的问题. 这也是今天不再采用这种机制的原因.</p>
+</blockquote>
+<h4 id="vs_1">对比: 值调用 vs 引用调用<a class="headerlink" href="#vs_1" title="Permanent link">&para;</a></h4>
+<blockquote>
+<p>指针调用应该是介于这两种之间的 (以 c++ 为例), 因此下表不考虑指针调用.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>定义</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>值调用</td>
+<td>调用者将参数的右值传递给被调用的过程</td>
+<td>形参的改变不影响实参的值</td>
+</tr>
+<tr>
+<td>引用调用</td>
+<td>调用者将参数的左值传递给被调用的过程</td>
+<td>如果实参是有左值的名字 or 表达式, 则传递左值<br/>若实参是没有左值的表达式, 则将这个值计算到新的存储单元, 然后传入这个单元的地址</td>
+</tr>
+</tbody>
+</table>
+<h3 id="167">1.6.7 别名<a class="headerlink" href="#167" title="Permanent link">&para;</a></h3>
+<p>引用调用 or 类似方法有可能引起 "两个形式参数指向同一个位置" 的情形, 这样的变量称为另一个变量的<strong>别名</strong> (alias).</p>
+<p>任意两个看起来从两个不同的形参中获得值的变量也有可能变成对方的别名.</p>
+<blockquote>
+<p><strong>例</strong> (别名):</p>
+<p>假设 <code>a</code> 是一个属于过程 <code>p</code> 的数组, <code>p</code> 通过调用 <code>q(a, a)</code> 调用了另一个过程 <code>q(x,y)</code> ,现在 <code>x</code> 和 <code>y</code> 互相为对方的别名.</p>
+</blockquote>
+<h2 id="1">第 1 章小结<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p><strong>语言处理器</strong>: 一个集成的软件开发环境, 其中包括很多种类的语言处理器, 比如解释器/ 汇编器/ 连接器/ 加载器/ 调试器以及程序概要提取工具.</p>
+<p><strong>编译器的步骤</strong>: 一个编译器的运作需要一系列的步骤, 每个步骤把源程序从一个中间 示转换成为另一个中间表示.</p>
+<p><strong>机器语言和汇编语言</strong>: 机器语言是第一代程序设计语言, 然后是汇编语言. 使用这些语言进行编程既费时, 又容易出错.</p>
+<p><strong>编译器设计中的建模</strong>: 编译器设计是理论对实践有很大影响的领域之一. 已知在编译器设计中有用的模型包括<strong>自动机/ 文法/ 正则表达式/ 树型结构</strong>和很多其他理论概念.</p>
+<p><strong>代码优化</strong>: 虽然代码不能真正达到最优化, 但提高代码效率的科学既复杂又非常重要. 它是编译技术研究的一个主要部分.</p>
+<p><strong>高级语言</strong>: 随着时间的流逝, 程序设计语言担负了越来越多的原先由程序员负责的任务, 比如内存管理/ 类型一致性检查/ 代码的并发执行.</p>
+<p><strong>编译器和计算机体系结构</strong>: 编译器技术影响了计算机的体系结构, 同时也受到体系结构发展的影响. 体系结构中的很多现代创新都依赖于编译器能够从源程序中抽取出有效利 用硬件能力的机会.</p>
+<p><strong>软件生产率和软件安全性</strong>: 使得编译器能够优化代码的技术同样能够用于多种不同的程序分析任务. 这些任务既包括探测常见的程序错误, 也包括发现程序可能会受到已被黑
+客们发现的多种入侵方式之一的伤害.</p>
+<p><strong>作用域规则</strong>: 一个 x 的声明的作用域是一段上下文, 在此上下文中对 x 的使用指向这个声明. 如果仅仅通过阅读某个语言的程序就可以确定其作用域, 那么这个语言就使用了<strong>静态作用域</strong> <em>(词法作用域)</em> ; 否则这个语言就使用了动态作用域.</p>
+<p><strong>环境</strong>: 名字和内存位置关联, 然后再和值相关联. 这个情况可以使用<strong>环境</strong>和<strong>状态</strong>来描述. 其中环境把名字映射成为存储位置, 而状态则把位置映射到它的值.</p>
+<p><strong>块结构</strong>: 允许语旬块相互嵌套的语言称为块结构的语言. 假设一个块中有一个 x 的声明 D, 而嵌套于这个块中的块 B 中有一个对名字 x 的使用. 如果在这两个块之间没有其他声明了 x 的块, 那么这个 x 的使用位于 D 的作用域内.</p>
+<p><strong>参数传递</strong>: 参数可以通过值或引用的方式从调用过程传递给被调用过程. 当通过值传递方式传递大型对象时, 实际被传递的值是指向这些对象本身的引用. 这样就变成了一个
+高效的<strong>引用调用</strong>.</p>
+<p><strong>别名</strong>: 当参数被以引用传递方式 (高效地) 传递时, 两个形式参数可能会指向同一个对象. 这会造成一个变量的修改改变了另一个变量的值.</p>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="https://nettee.github.io/posts/2018/Understanding-lvalues-and-rvalues-in-C-and-C/">理解 C/C++ 中的左值和右值 | nettee 的 blog</a></li>
+</ol>
+<!-- 下面是脚注区域 -->
+
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>等价变换: 是指功能的等价性&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>左值 <span class="arithmatex">\(\sim\)</span> 可以出现在赋值号左边的值; 右值的大概定义同理&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" data-md-state="hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="index.html" class="md-footer__link md-footer__link--prev" aria-label="上一页: Home" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              Home
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="chap_02.html" class="md-footer__link md-footer__link--next" aria-label="下一页: C2 一个简单的语法制导翻译器" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              C2 一个简单的语法制导翻译器
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": ["search.suggest", "search.highlight", "navigation.top"], "translations": {"clipboard.copy": "\u590d\u5236", "clipboard.copied": "\u5df2\u590d\u5236", "search.config.lang": "ja", "search.config.pipeline": "trimmer, stemmer", "search.config.separator": "[\\uff0c\\u3002]+", "search.placeholder": "\u641c\u7d22", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.477d984a.min.js", "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.ddd52ceb.min.js"></script>
+      
+        <script src="javascripts/config.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

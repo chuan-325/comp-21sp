@@ -1,0 +1,923 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.1, mkdocs-material-7.1.10">
+    
+    
+      
+        <title>C3 词法分析 - Notes for Compiler Principles</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.1fe995fd.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.f1a3b89f.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#009485">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <script>function __prefix(e){return new URL(".",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#c3" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="Notes for Compiler Principles" class="md-header__button md-logo" aria-label="Notes for Compiler Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Notes for Compiler Principles
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              C3 词法分析
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/chuan-325/comp-21sp/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chuan-325/comp-21sp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="Notes for Compiler Principles" class="md-nav__button md-logo" aria-label="Notes for Compiler Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    Notes for Compiler Principles
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/chuan-325/comp-21sp/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chuan-325/comp-21sp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      <label class="md-nav__link" for="__nav_2">
+        Note
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Note" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Note
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_01.html" class="md-nav__link">
+        C1 编译概论
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_02.html" class="md-nav__link">
+        C2 一个简单的语法制导翻译器
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          C3 词法分析
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="chap_03.html" class="md-nav__link md-nav__link--active">
+        C3 词法分析
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    3.1 词法分析的作用
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 词法分析的作用">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#311-vs" class="md-nav__link">
+    3.1.1 词法分析 vs 语法分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312" class="md-nav__link">
+    3.1.2 词法单元/模式/词素
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#313" class="md-nav__link">
+    3.1.3 词法单元的属性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#314" class="md-nav__link">
+    3.1.4 词法错误
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#32" class="md-nav__link">
+    3.2 输入缓冲
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    参考资料
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_04.html" class="md-nav__link">
+        C4 语法分析
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_05.html" class="md-nav__link">
+        C5 语法制导的翻译
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="chap_08.html" class="md-nav__link">
+        C8 代码生成和优化
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      <label class="md-nav__link" for="__nav_3">
+        Homework
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Homework" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Homework
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_01.html" class="md-nav__link">
+        hw-01-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_02_01.html" class="md-nav__link">
+        hw-02-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_02_02.html" class="md-nav__link">
+        hw-02-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_03_01.html" class="md-nav__link">
+        hw-03-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_03_02.html" class="md-nav__link">
+        hw-03-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_01.html" class="md-nav__link">
+        hw-04-01
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_02.html" class="md-nav__link">
+        hw-04-02
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hw/hw_04_03.html" class="md-nav__link">
+        hw-04-03
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    3.1 词法分析的作用
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 词法分析的作用">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#311-vs" class="md-nav__link">
+    3.1.1 词法分析 vs 语法分析
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312" class="md-nav__link">
+    3.1.2 词法单元/模式/词素
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#313" class="md-nav__link">
+    3.1.3 词法单元的属性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#314" class="md-nav__link">
+    3.1.4 词法错误
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#32" class="md-nav__link">
+    3.2 输入缓冲
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    参考资料
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/chuan-325/comp-21sp/edit/master/docs/chap_03.md" title="编辑此页" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="c3">C3 词法分析<a class="headerlink" href="#c3" title="Permanent link">&para;</a></h1>
+<!-- ! TODO -->
+
+<blockquote>
+<p>提示: 本页面未施工完成, 请谨慎辨别.</p>
+</blockquote>
+<h2 id="31">3.1 词法分析的作用<a class="headerlink" href="#31" title="Permanent link">&para;</a></h2>
+<p>词法分析器的主要任务: <strong>识别词素</strong></p>
+<ul>
+<li>读入源程序的输入字符, 将它们组成词素, 然后生成并输出一个 <strong>词法单元序列</strong>.</li>
+</ul>
+<p>词法分析器和符号表的交互 (由语法分析器调用词法分析器来实现):</p>
+<ol>
+<li>发现词素: 添加到符号表</li>
+<li>决定向语法分析器传送哪个词法单元: 从符号表中读取有关标识符种类的信息</li>
+</ol>
+<p><img alt="lex-symbol-parser" src="chap_03.assets/lex-symbol-parser.png" /></p>
+<p>词法分析器在编译器中负责读取源程序,
+因此它除了识别词素之外,
+还需要:</p>
+<ul>
+<li>过滤源程序中的空白符(空格/ 制表符/ 换行符),</li>
+<li>将编译器生成的错误消息与源程序的位置联系起来.</li>
+</ul>
+<p>因此有时也将词法分析器分成两个级联的处理阶段:</p>
+<ol>
+<li><strong>扫描阶段</strong>: 完成不需要生成词法单元的简单处理;</li>
+<li><strong>词法分析阶段</strong>: 处理扫描阶段的输出, 生成词法单元.</li>
+</ol>
+<h3 id="311-vs">3.1.1 词法分析 vs 语法分析<a class="headerlink" href="#311-vs" title="Permanent link">&para;</a></h3>
+<p>将词法分析和语法分析分离开来, 可以:</p>
+<ol>
+<li>简化编译器设计 (因为至少简化了一项任务)</li>
+<li>提高编译器的效率</li>
+<li>增加编译器的可移植性 (将输入字符集/平台规则限制在词法分析中).</li>
+</ol>
+<h3 id="312">3.1.2 词法单元/模式/词素<a class="headerlink" href="#312" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>词法单元/记号</strong> (token): 词法单元名+可选属性值.<ul>
+<li>词法单元名: 表示某种词法单位的抽象符号, 它们是语法分析器处理的符号.</li>
+</ul>
+</li>
+<li><strong>模式</strong>:一个词法单元的词素可能具有的形式.</li>
+<li><strong>词素</strong> (lexeme): 源程序中的字符序列, 与某个词法单元的模式匹配, 并被词法分析器识别为该词法单元的一个实例</li>
+</ul>
+<p>举例:</p>
+<table>
+<thead>
+<tr>
+<th>词素</th>
+<th>词法单元</th>
+<th>模式 (非正式!)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>if</code></td>
+<td>if</td>
+<td>'i', 'f'</td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>comparison</td>
+<td><code>&lt;</code> or <code>&gt;</code> or <code>==</code> or <code>&gt;=</code> or <code>&lt;=</code> or <code>!=</code></td>
+</tr>
+<tr>
+<td>score</td>
+<td>id</td>
+<td>字母开头的字母/数字串</td>
+</tr>
+<tr>
+<td>"core dumped"</td>
+<td>literal</td>
+<td>在 <code>""</code> 之间除 <code>"</code> 之外的字符</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>词法单元/记号/token 是源语言语法的终结符,
+一般定义为枚举型:</p>
+<ul>
+<li>关键字 (if, else 这样的字符序列)</li>
+<li>算符(comparison, arithmetic op, ...)</li>
+<li>标识符(id)</li>
+<li>常数(number)</li>
+<li>字符串(literal)</li>
+<li>标点符号...</li>
+</ul>
+</blockquote>
+<p>较为通用的词法单元:</p>
+<table>
+<thead>
+<tr>
+<th>词法单元</th>
+<th>模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>关键字</td>
+<td>关键字本身</td>
+</tr>
+<tr>
+<td>运算符</td>
+<td>单个/一类运算符</td>
+</tr>
+<tr>
+<td>标识符(id)</td>
+<td>(和所有标识符模式匹配)</td>
+</tr>
+<tr>
+<td>常量(数字/字符串)</td>
+<td>(数字/字面值字符串)</td>
+</tr>
+<tr>
+<td>标点符号</td>
+<td>(应该也是本身吧...)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="313">3.1.3 词法单元的属性<a class="headerlink" href="#313" title="Permanent link">&para;</a></h3>
+<p>词法单元/记号的属性: 词法单元的特性/特征, 值是该特性/特征的值.</p>
+<p>如果一个模式能匹配不止一个单词,
+词法分析器必须为记号提供附加的信息 (属性, 比如到底匹配到了哪一个词素),
+但有些记号不需要附加的属性值.</p>
+<p>举例: 0 和 1 都能和词法单元 number 的模式匹配,
+但是要生成可执行代码显然还需要知道到底找到了哪个词素</p>
+<p><strong>词法单元名字(记号)将影响语法分析的决策, 而属性影响记号的翻译.</strong></p>
+<p>词法单元名字和相关属性值常常可以写成<strong>名字-属性对序列</strong>,
+如 <code>a=b+1;</code> 语句对应的词法单元序列:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>&lt;id, 指向符号表中 a 的条目的指针&gt;
+&lt;assign_op&gt;
+&lt;id, 指向符号表中 b 的条目的指针&gt;
+&lt;add_op&gt;
+&lt;number, 整数值 1&gt;
+</code></pre></div>
+</td></tr></table>
+<p>说明:</p>
+<ul>
+<li>通常, 一个记号具有一个属性值;</li>
+<li>对于某些 <code>&lt;词法单元名字, 属性值&gt;</code> 对, 尤其是 <strong>运算符/标点符号/关键字</strong> 的对, 不需要有属性值.</li>
+</ul>
+<h3 id="314">3.1.4 词法错误<a class="headerlink" href="#314" title="Permanent link">&para;</a></h3>
+<p>词法分析基本无法检出错误.</p>
+<blockquote>
+<p>然而, 假设出现所有词法单元的模式都无法和剩余输入的某个前缀相匹配,
+此时词法分析器就不能继续处理输入.</p>
+</blockquote>
+<p>错误恢复策略:</p>
+<ul>
+<li>最简单: <strong>恐慌模式</strong>. 从剩余的输入中不断删除字符, 直到词法分析器能在剩余输入前缀中发现一个正确的词法单元;</li>
+<li>其他可以采取的策略 (试图修复): 删除一个多余的字符/插入一个遗漏的字符/用一个正确的字符代替一个不正确的字符/交换两个相邻的字符/...</li>
+</ul>
+<h2 id="32">3.2 输入缓冲<a class="headerlink" href="#32" title="Permanent link">&para;</a></h2>
+<p>为什么要采用<strong>缓冲区</strong>?
+词法分析程序可能要向前看若干个字符,
+才能决定词素符号的确切性质.</p>
+<p>缓冲区的选择:</p>
+<ul>
+<li>只用一个单独的缓冲区: 无论缓冲区多大, 都不能保证词素符号不会被缓冲区的边界截断 (永远存在 N+1);</li>
+<li>引入 <strong>缓冲区对</strong>: 将一个缓冲区分为相同的两个部分, 容量均为 N.</li>
+</ul>
+<p><strong>缓冲区对</strong> 的工作方案:</p>
+<ol>
+<li>每一次读入: 读入 N 个字符, 读入不足 N 个字符则在末尾用 eof 标志表明;</li>
+<li>输入缓冲区维护两个指针: 开始指针 (lexemeBegin) 和向前指针 (forward);<ul>
+<li>lexemeBegin: 标识当前词素的开头</li>
+<li>forward: 向前扫描, 直到发现一个模式匹配</li>
+</ul>
+</li>
+<li>(加入<strong>哨兵标记</strong>) 在缓冲区末尾加入一个哨兵标记 eof, 使缓冲区末尾判定和输入末尾判定可以统一处理.</li>
+</ol>
+<p><strong>缓冲区对</strong> 的工作步骤:</p>
+<ol>
+<li>开始: 两个指针都指向下一个词素符号的第一个字符;</li>
+<li>forward 向前扫描, 直至确定词素符号<ul>
+<li>确定词素 (此时 forward 在这个词素的最右端)</li>
+<li>将词素 (从 lexemeBegin 到 foward) 返回语法分析器</li>
+<li>处理完成</li>
+</ul>
+</li>
+<li>lexemeBegin 指向刚找到的词素之后的第一个符号, forward 回退一个字符</li>
+</ol>
+<!-- 中文书本88/649 英文书本141/1035 -->
+
+<!-- ## 记号的描述, 正则式
+
+## 记号的识别
+
+## 有穷状态自动机
+
+## 正则式与有穷状态自动机的等价
+
+## 词法分析程序的自动生成工具 -->
+
+<h2 id="_1">参考资料<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="https://www.youtube.com/watch?v=Vi2VKYMIvAI">Input buffering in lexical analysis | SSCD | 17CS63 | 15CS63 | VTU - YouTube</a>: 咖喱味略浓, 3:35 起讲解 buffer pair 工作机制;</li>
+<li><a href="https://www.easyexamnotes.com/p/input-buffering.html">EasyExamNotes: Input buffering</a>: 推荐阅读, 比较详细地描述了 buffer pair 的工作机制和两个指针的职责;</li>
+<li><a href="https://www.geeksforgeeks.org/?p=289137">Input Buffering in Compiler Design - GeeksforGeeks</a>: 虽然它讲得有点粗糙, 但是对比了 single buffer 和 double buffer, 所以也值得一看;</li>
+<li><a href="https://www.findanyquestion.com/2020/05/what-is-input-buffering-explain-technique-of-buffer-pair.html">What is input buffering? Explain technique of buffer pair. ~ FindAnyQuestion</a>: 带有比较详细的伪码;</li>
+<li><a href="https://www.cnblogs.com/cyjb/p/LexerInputBuffer.html">C# 词法分析器（二）输入缓冲和代码定位 - CYJB - 博客园</a>: 讲出了很重要的一点, buffer pair 相对于 single buffer 的优势在工程上更明显 (reduce overhead)), 而非理论科学领域的优势;</li>
+<li><a href="http://compilerdesigndetails.blogspot.com/2012/02/buffering.html">Buffering | principles of compiler design</a>: 唯一一份仔细讲了坏处的文章;</li>
+</ol>
+<!-- ! Scanners use double-buffering to minimize the overheads associated with this. -->
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" data-md-state="hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="chap_02.html" class="md-footer__link md-footer__link--prev" aria-label="上一页: C2 一个简单的语法制导翻译器" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              C2 一个简单的语法制导翻译器
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="chap_04.html" class="md-footer__link md-footer__link--next" aria-label="下一页: C4 语法分析" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              C4 语法分析
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": ["search.suggest", "search.highlight", "navigation.top"], "translations": {"clipboard.copy": "\u590d\u5236", "clipboard.copied": "\u5df2\u590d\u5236", "search.config.lang": "ja", "search.config.pipeline": "trimmer, stemmer", "search.config.separator": "[\\uff0c\\u3002]+", "search.placeholder": "\u641c\u7d22", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.477d984a.min.js", "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.ddd52ceb.min.js"></script>
+      
+        <script src="javascripts/config.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
